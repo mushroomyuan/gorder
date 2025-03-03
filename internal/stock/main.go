@@ -20,7 +20,7 @@ func init() {
 
 func main() {
 	serviceName := viper.GetString("stock.service-name")
-	serviceType := viper.GetString("stock.service-to-run")
+	serviceType := viper.GetString("stock.server-to-run")
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()

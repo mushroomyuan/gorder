@@ -1,6 +1,6 @@
 syntax="proto3";
 package orderpb;
-option go_package="github.com/mushroomyuan/gorder/common/genporto/orderpb";
+option go_package="github.com/mushroomyuan/gorder/common/genproto/orderpb";
 
 import "google/protobuf/empty.proto";
 
