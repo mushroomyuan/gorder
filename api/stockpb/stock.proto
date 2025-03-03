@@ -1,0 +1,28 @@
+syntax = "proto3";
+package stockpb;
+
+option go_package = "github.com/mushroomyuan/gorder/common/genporto/stockpb";
+
+import "orderpb/order.proto";
+
+service StockService{
+  rpc GetItems(GetItemsRequest) returns (GetItemsResponse);
+  rpc CheckIfItemsInStock(CheckIfItemsInStockRequset) returns (CheckIfItemsInStockResponse);
+}
+message GetItemsRequest{
+  repeated string ItemsIDs = 1;
+}
+
+message GetItemsResponse{
+  repeated orderpb.Item Items = 1;
+}
+
+message CheckIfItemsInStockRequset{
+  repeated orderpb.ItemWithQuantity Items = 1;
+}
+
+message CheckIfItemsInStockResponse{
+  int32 InStock = 1;
+  repeated orderpb.Item Items = 2;
+}
+
