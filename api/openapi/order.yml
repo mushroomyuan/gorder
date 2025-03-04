@@ -78,7 +78,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Item'
-        paymmentLink:
+        paymentLink:
           type: string
 
     Item:
