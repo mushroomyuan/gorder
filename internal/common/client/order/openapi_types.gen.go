@@ -30,10 +30,10 @@ type ItemWithQuantity struct {
 
 // Order defines model for Order.
 type Order struct {
-	CustomerID   *string `json:"customerID,omitempty"`
-	Id           *string `json:"id,omitempty"`
-	Items        *[]Item `json:"items,omitempty"`
-	PaymmentLink *string `json:"paymmentLink,omitempty"`
+	CustomerID  *string `json:"customerID,omitempty"`
+	Id          *string `json:"id,omitempty"`
+	Items       *[]Item `json:"items,omitempty"`
+	PaymentLink *string `json:"paymentLink,omitempty"`
 }
 
 // PostCustomerCustomerIDOrdersJSONRequestBody defines body for PostCustomerCustomerIDOrders for application/json ContentType.
