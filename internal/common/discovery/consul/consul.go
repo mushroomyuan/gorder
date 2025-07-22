@@ -49,21 +49,20 @@ func (r *Registry) Register(_ context.Context, instanceId, serviceName, hostPort
 	if err != nil {
 		return fmt.Errorf("invalid port format: %w", err)
 	}
-	r.client.Agent().ServiceRegister(&consul.AgentServiceRegistration{
+	return r.client.Agent().ServiceRegister(&consul.AgentServiceRegistration{
 		ID:      instanceId,
 		Name:    serviceName,
 		Port:    port,
 		Address: host,
 		Check: &consul.AgentServiceCheck{
 			CheckID:                        instanceId,
-			TLSSkipVerify:                  true,
+			TLSSkipVerify:                  false,
 			TTL:                            "5s",
 			Timeout:                        "5s",
 			DeregisterCriticalServiceAfter: "10s",
-			HTTP:                           fmt.Sprintf("http://%s:%d/health", host, port),
+			// HTTP:                           fmt.Sprintf("http://%s:%d/health", host, port),
 		},
 	})
-	return nil
 }
 
 func (r *Registry) DeRegister(_ context.Context, instanceId, serviceName string) error {
