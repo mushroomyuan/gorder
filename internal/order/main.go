@@ -2,12 +2,14 @@ package main
 
 import (
 	"context"
+
 	"github.com/gin-gonic/gin"
 	"github.com/mushroomyuan/gorder/common/config"
 	"github.com/mushroomyuan/gorder/common/genproto/orderpb"
 	"github.com/mushroomyuan/gorder/common/server"
 	"github.com/mushroomyuan/gorder/order/ports"
 	"github.com/mushroomyuan/gorder/order/service"
+	"github.com/mushroomyuan/gorder/common/discovery"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"google.golang.org/grpc"
@@ -38,11 +40,20 @@ func main() {
 	serviceName := viper.Sub("order").GetString("service-name")
 	//serviceType := viper.GetString("stock.service-to-run")
 
+
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
 	application, cleanup := service.NewApplication(ctx)
 	defer cleanup()
+
+	deregisterFunc, err := discovery.RegistryToConsul(ctx, serviceName)
+	if err != nil {
+		logrus.Fatal(err)
+	}
+	defer func() {
+		_ = deregisterFunc()
+	}()
 
 	go server.RunGRPCServer(serviceName, func(server *grpc.Server) {
 		svc := ports.NewGRPCServer(application)
