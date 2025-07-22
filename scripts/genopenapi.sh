@@ -19,10 +19,12 @@ GEN_SERVER=(
   "gin-server"
 )
 
-if [ "${GEN_SERVER[@]}" -ne 1 ];then
+if [ "${#GEN_SERVER[@]}" -ne 1 ];then
   log_error "GEN_SERVER enables more than 1 server,please check."
   exit 225
 fi
+# ${#GEN_SERVER[@]} 表示 数组长度。
+# -ne 1 是 Bash 中的整数比较运算符，表示 “not equal to 1（不等于 1）”。
 
 log_callout "Using ${GEN_SERVER[0]}"
 
@@ -50,6 +52,8 @@ function gen() {
     run oapi-codegen -generate client -o "internal/common/client/$service/openapi_client.gen.go" -package "$service" "api/openapi/$service.yml"
     run oapi-codegen -generate types -o "internal/common/client/$service/openapi_types.gen.go" -package "$service" "api/openapi/$service.yml"
 }
+# 这里的 local output_dir=$1 ... 代表第一、第二、第三个参数
+
 
 gen internal/order/ports ports order
 
