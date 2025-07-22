@@ -16,10 +16,10 @@ func NewStockGRPC(client stockpb.StockServiceClient) *StockGRPC {
 	return &StockGRPC{client: client}
 }
 
-func (s StockGRPC) CheckIfItemsInStock(ctx context.Context, items []*orderpb.ItemWithQuantity) error {
+func (s StockGRPC) CheckIfItemsInStock(ctx context.Context, items []*orderpb.ItemWithQuantity) (*stockpb.CheckIfItemsInStockResponse, error) {
 	response, err := s.client.CheckIfItemsInStock(ctx, &stockpb.CheckIfItemsInStockRequset{Items: items})
 	logrus.Info("stock_grpc response", response)
-	return err
+	return response, err
 }
 
 func (s StockGRPC) GetItems(ctx context.Context, itemsIDs []string) ([]*orderpb.Item, error) {

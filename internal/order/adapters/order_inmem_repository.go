@@ -42,7 +42,7 @@ func (m *MemoryOrderRepository) Create(_ context.Context, order *domain.Order) (
 	}
 	m.store = append(m.store, newOrder)
 	logrus.WithFields(logrus.Fields{
-		"input order":        order,
+		"input_order":        order,
 		"store_after_create": m.store,
 	}).Debug("memory order created")
 	return newOrder, nil

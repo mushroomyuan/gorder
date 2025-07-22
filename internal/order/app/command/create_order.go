@@ -7,6 +7,7 @@ import (
 	"github.com/mushroomyuan/gorder/order/app/query"
 	domain "github.com/mushroomyuan/gorder/order/domain/order"
 	"github.com/sirupsen/logrus"
+	"errors"
 )
 
 type CreateOrder struct {
@@ -26,31 +27,45 @@ type createOrderHandler struct {
 }
 
 func (c createOrderHandler) Handle(ctx context.Context, cmd CreateOrder) (*CreateOrderResult, error) {
-	// TODO: call stock grpc to get items.
-	err := c.stockGRPC.CheckIfItemsInStock(ctx, cmd.Items)
+	validateItems,err:= c.validate(ctx,cmd.Items)
 	if err != nil {
 		return nil, err
-	}
-	resp, err := c.stockGRPC.GetItems(ctx, []string{"123"})
-	if err != nil {
-		return nil, err
-	}
-	logrus.Info("createOrderHandler||err from stockGRPC GetItems", resp)
-	var stockResponse []*orderpb.Item
-	for _, item := range cmd.Items {
-		stockResponse = append(stockResponse, &orderpb.Item{
-			ID:       item.ID,
-			Quantity: item.Quantity,
-		})
 	}
 	o, err := c.orderRepo.Create(ctx, &domain.Order{
 		CustomerID: cmd.CustomerID,
-		Items:      stockResponse,
+		Items:      validateItems,
 	})
 	if err != nil {
 		return nil, err
 	}
 	return &CreateOrderResult{OrderID: o.ID}, nil
+}
+
+func (c createOrderHandler) validate(ctx context.Context, itemsWithQuantity []*orderpb.ItemWithQuantity) ([]*orderpb.Item, error) {
+	if len(itemsWithQuantity) == 0 {
+		return nil, errors.New("items is empty")
+	}
+	itemsWithQuantity = packItems(itemsWithQuantity)
+	response, err := c.stockGRPC.CheckIfItemsInStock(ctx, itemsWithQuantity)
+	if err != nil {
+		return nil, err
+	}
+	return response.Items, nil
+}
+
+func packItems(items []*orderpb.ItemWithQuantity) []*orderpb.ItemWithQuantity {
+	mergedItems := make(map[string]int32)
+	for _, item := range items {
+		mergedItems[item.ID] += item.Quantity
+	}
+	var result []*orderpb.ItemWithQuantity
+	for id, quantity := range mergedItems {
+		result = append(result, &orderpb.ItemWithQuantity{
+			ID:       id,
+			Quantity: quantity,
+		})
+	}
+	return result
 }
 
 func NewCreateOrderHandler(
