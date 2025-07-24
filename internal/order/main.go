@@ -5,17 +5,20 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/mushroomyuan/gorder/common/config"
+	"github.com/mushroomyuan/gorder/common/discovery"
 	"github.com/mushroomyuan/gorder/common/genproto/orderpb"
+	"github.com/mushroomyuan/gorder/common/logging"
 	"github.com/mushroomyuan/gorder/common/server"
 	"github.com/mushroomyuan/gorder/order/ports"
 	"github.com/mushroomyuan/gorder/order/service"
-	"github.com/mushroomyuan/gorder/common/discovery"
+
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"google.golang.org/grpc"
 )
 
 func init() {
+	logging.Init()
 	if err := config.NewViperConfig(); err != nil {
 		logrus.Fatal(err)
 	}
@@ -39,7 +42,6 @@ func main() {
 	//}
 	serviceName := viper.Sub("order").GetString("service-name")
 	//serviceType := viper.GetString("stock.service-to-run")
-
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
