@@ -32,8 +32,8 @@ func (G GRPCServer) GetItems(ctx context.Context, request *stockpb.GetItemsReque
 	}, nil
 }
 
-func (G GRPCServer) CheckIfItemsInStock(ctx context.Context, requset *stockpb.CheckIfItemsInStockRequset) (*stockpb.CheckIfItemsInStockResponse, error) {
-	items, err := G.app.Queries.CheckIfItemsInStock.Handle(ctx, query.CheckIfItemsInStock{Items: requset.Items})
+func (G GRPCServer) CheckIfItemsInStock(ctx context.Context, request *stockpb.CheckIfItemsInStockRequest) (*stockpb.CheckIfItemsInStockResponse, error) {
+	items, err := G.app.Queries.CheckIfItemsInStock.Handle(ctx, query.CheckIfItemsInStock{Items: request.Items})
 	if err != nil {
 		return nil, err
 	}

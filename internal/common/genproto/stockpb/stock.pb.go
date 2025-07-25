@@ -110,27 +110,27 @@ func (x *GetItemsResponse) GetItems() []*orderpb.Item {
 	return nil
 }
 
-type CheckIfItemsInStockRequset struct {
+type CheckIfItemsInStockRequest struct {
 	state         protoimpl.MessageState      `protogen:"open.v1"`
 	Items         []*orderpb.ItemWithQuantity `protobuf:"bytes,1,rep,name=Items,proto3" json:"Items,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *CheckIfItemsInStockRequset) Reset() {
-	*x = CheckIfItemsInStockRequset{}
+func (x *CheckIfItemsInStockRequest) Reset() {
+	*x = CheckIfItemsInStockRequest{}
 	mi := &file_stockpb_stock_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *CheckIfItemsInStockRequset) String() string {
+func (x *CheckIfItemsInStockRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*CheckIfItemsInStockRequset) ProtoMessage() {}
+func (*CheckIfItemsInStockRequest) ProtoMessage() {}
 
-func (x *CheckIfItemsInStockRequset) ProtoReflect() protoreflect.Message {
+func (x *CheckIfItemsInStockRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_stockpb_stock_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -142,12 +142,12 @@ func (x *CheckIfItemsInStockRequset) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use CheckIfItemsInStockRequset.ProtoReflect.Descriptor instead.
-func (*CheckIfItemsInStockRequset) Descriptor() ([]byte, []int) {
+// Deprecated: Use CheckIfItemsInStockRequest.ProtoReflect.Descriptor instead.
+func (*CheckIfItemsInStockRequest) Descriptor() ([]byte, []int) {
 	return file_stockpb_stock_proto_rawDescGZIP(), []int{2}
 }
 
-func (x *CheckIfItemsInStockRequset) GetItems() []*orderpb.ItemWithQuantity {
+func (x *CheckIfItemsInStockRequest) GetItems() []*orderpb.ItemWithQuantity {
 	if x != nil {
 		return x.Items
 	}
@@ -220,7 +220,7 @@ var file_stockpb_stock_proto_rawDesc = string([]byte{
 	0x01, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x0d, 0x2e, 0x6f, 0x72, 0x64, 0x65, 0x72, 0x70, 0x62, 0x2e,
 	0x49, 0x74, 0x65, 0x6d, 0x52, 0x05, 0x49, 0x74, 0x65, 0x6d, 0x73, 0x22, 0x4d, 0x0a, 0x1a, 0x43,
 	0x68, 0x65, 0x63, 0x6b, 0x49, 0x66, 0x49, 0x74, 0x65, 0x6d, 0x73, 0x49, 0x6e, 0x53, 0x74, 0x6f,
-	0x63, 0x6b, 0x52, 0x65, 0x71, 0x75, 0x73, 0x65, 0x74, 0x12, 0x2f, 0x0a, 0x05, 0x49, 0x74, 0x65,
+	0x63, 0x6b, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x2f, 0x0a, 0x05, 0x49, 0x74, 0x65,
 	0x6d, 0x73, 0x18, 0x01, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x19, 0x2e, 0x6f, 0x72, 0x64, 0x65, 0x72,
 	0x70, 0x62, 0x2e, 0x49, 0x74, 0x65, 0x6d, 0x57, 0x69, 0x74, 0x68, 0x51, 0x75, 0x61, 0x6e, 0x74,
 	0x69, 0x74, 0x79, 0x52, 0x05, 0x49, 0x74, 0x65, 0x6d, 0x73, 0x22, 0x5c, 0x0a, 0x1b, 0x43, 0x68,
@@ -238,7 +238,7 @@ var file_stockpb_stock_proto_rawDesc = string([]byte{
 	0x65, 0x63, 0x6b, 0x49, 0x66, 0x49, 0x74, 0x65, 0x6d, 0x73, 0x49, 0x6e, 0x53, 0x74, 0x6f, 0x63,
 	0x6b, 0x12, 0x23, 0x2e, 0x73, 0x74, 0x6f, 0x63, 0x6b, 0x70, 0x62, 0x2e, 0x43, 0x68, 0x65, 0x63,
 	0x6b, 0x49, 0x66, 0x49, 0x74, 0x65, 0x6d, 0x73, 0x49, 0x6e, 0x53, 0x74, 0x6f, 0x63, 0x6b, 0x52,
-	0x65, 0x71, 0x75, 0x73, 0x65, 0x74, 0x1a, 0x24, 0x2e, 0x73, 0x74, 0x6f, 0x63, 0x6b, 0x70, 0x62,
+	0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x24, 0x2e, 0x73, 0x74, 0x6f, 0x63, 0x6b, 0x70, 0x62,
 	0x2e, 0x43, 0x68, 0x65, 0x63, 0x6b, 0x49, 0x66, 0x49, 0x74, 0x65, 0x6d, 0x73, 0x49, 0x6e, 0x53,
 	0x74, 0x6f, 0x63, 0x6b, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x42, 0x38, 0x5a, 0x36,
 	0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x6d, 0x75, 0x73, 0x68, 0x72,
@@ -263,17 +263,17 @@ var file_stockpb_stock_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
 var file_stockpb_stock_proto_goTypes = []any{
 	(*GetItemsRequest)(nil),             // 0: stockpb.GetItemsRequest
 	(*GetItemsResponse)(nil),            // 1: stockpb.GetItemsResponse
-	(*CheckIfItemsInStockRequset)(nil),  // 2: stockpb.CheckIfItemsInStockRequset
+	(*CheckIfItemsInStockRequest)(nil),  // 2: stockpb.CheckIfItemsInStockRequest
 	(*CheckIfItemsInStockResponse)(nil), // 3: stockpb.CheckIfItemsInStockResponse
 	(*orderpb.Item)(nil),                // 4: orderpb.Item
 	(*orderpb.ItemWithQuantity)(nil),    // 5: orderpb.ItemWithQuantity
 }
 var file_stockpb_stock_proto_depIdxs = []int32{
 	4, // 0: stockpb.GetItemsResponse.Items:type_name -> orderpb.Item
-	5, // 1: stockpb.CheckIfItemsInStockRequset.Items:type_name -> orderpb.ItemWithQuantity
+	5, // 1: stockpb.CheckIfItemsInStockRequest.Items:type_name -> orderpb.ItemWithQuantity
 	4, // 2: stockpb.CheckIfItemsInStockResponse.Items:type_name -> orderpb.Item
 	0, // 3: stockpb.StockService.GetItems:input_type -> stockpb.GetItemsRequest
-	2, // 4: stockpb.StockService.CheckIfItemsInStock:input_type -> stockpb.CheckIfItemsInStockRequset
+	2, // 4: stockpb.StockService.CheckIfItemsInStock:input_type -> stockpb.CheckIfItemsInStockRequest
 	1, // 5: stockpb.StockService.GetItems:output_type -> stockpb.GetItemsResponse
 	3, // 6: stockpb.StockService.CheckIfItemsInStock:output_type -> stockpb.CheckIfItemsInStockResponse
 	5, // [5:7] is the sub-list for method output_type

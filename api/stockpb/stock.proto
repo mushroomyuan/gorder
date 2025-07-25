@@ -7,7 +7,7 @@ import "orderpb/order.proto";
 
 service StockService{
   rpc GetItems(GetItemsRequest) returns (GetItemsResponse);
-  rpc CheckIfItemsInStock(CheckIfItemsInStockRequset) returns (CheckIfItemsInStockResponse);
+  rpc CheckIfItemsInStock(CheckIfItemsInStockRequest) returns (CheckIfItemsInStockResponse);
 }
 message GetItemsRequest{
   repeated string ItemsIDs = 1;
@@ -17,7 +17,7 @@ message GetItemsResponse{
   repeated orderpb.Item Items = 1;
 }
 
-message CheckIfItemsInStockRequset{
+message CheckIfItemsInStockRequest{
   repeated orderpb.ItemWithQuantity Items = 1;
 }
 

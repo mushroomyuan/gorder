@@ -5,6 +5,7 @@ import (
 	"github.com/mushroomyuan/gorder/common/config"
 	"github.com/mushroomyuan/gorder/common/logging"
 	"github.com/mushroomyuan/gorder/common/server"
+	"github.com/mushroomyuan/gorder/payment/infrastructure/consumer"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 )
@@ -33,6 +34,8 @@ func main() {
 		_ = ch.Close()
 		_ = closeCh()
 	}()
+
+	go consumer.NewConsumer().Listen(ch)
 
 	paymentHandler := NewPaymentHandler()
 	switch serverType {
