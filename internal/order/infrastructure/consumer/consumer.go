@@ -23,7 +23,6 @@ func NewConsumer(app app.Application) *Consumer {
 }
 
 func (c *Consumer) Listen(ch *amqp.Channel) {
-	logrus.Info("listen1")
 	q, err := ch.QueueDeclare(broker.EventOrderPaid, true, false, true, false, nil)
 	if err != nil {
 		logrus.Fatal(err)
@@ -36,7 +35,6 @@ func (c *Consumer) Listen(ch *amqp.Channel) {
 	if err != nil {
 		logrus.Fatal(err)
 	}
-	logrus.Info("listen2")
 	go func() {
 		for msg := range msgs {
 			c.handleMessge(msg)
@@ -47,13 +45,11 @@ func (c *Consumer) Listen(ch *amqp.Channel) {
 
 func (c *Consumer) handleMessge(msg amqp.Delivery) {
 	o := &domain.Order{}
-	logrus.Infof("handlemessage1")
 	if err := json.Unmarshal(msg.Body, o); err != nil {
 		logrus.Infof("error unmarshal msg.body into domain.order,err=%v", err)
 		_ = msg.Nack(false, false)
 		return
 	}
-	logrus.Infof("handlemessage2,obj=%v", o)
 	_, err := c.app.Commands.UpdateOrder.Handle(context.Background(), command.UpdateOrder{
 		Order: o,
 		UpdateFn: func(ctx context.Context, order *domain.Order) (*domain.Order, error) {
