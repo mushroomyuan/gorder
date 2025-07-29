@@ -1,15 +1,25 @@
 package consumer
 
 import (
+	"context"
+	"encoding/json"
+
 	"github.com/mushroomyuan/gorder/common/broker"
+	"github.com/mushroomyuan/gorder/common/genproto/orderpb"
+	"github.com/mushroomyuan/gorder/payment/app"
+	"github.com/mushroomyuan/gorder/payment/app/command"
 	amqp "github.com/rabbitmq/amqp091-go"
 	"github.com/sirupsen/logrus"
 )
 
-type Consumer struct{}
+type Consumer struct {
+	app app.Application
+}
 
-func NewConsumer() *Consumer {
-	return &Consumer{}
+func NewConsumer(app app.Application) *Consumer {
+	return &Consumer{
+		app: app,
+	}
 }
 
 func (c *Consumer) Listen(ch *amqp.Channel) {
@@ -24,16 +34,33 @@ func (c *Consumer) Listen(ch *amqp.Channel) {
 
 	go func() {
 		for msg := range msgs {
-			c.handleMessge(msg, q, ch)
+			c.handleMessge(msg, q)
 		}
 	}()
 	select {}
 }
 
-func (c *Consumer) handleMessge(msg amqp.Delivery, q amqp.Queue, ch *amqp.Channel) {
+func (c *Consumer) handleMessge(msg amqp.Delivery, q amqp.Queue) {
 	logrus.Infof("Payment receive a message from %s,msg = %s", q.Name, string(msg.Body))
+
+	o := &orderpb.Order{}
+	if err := json.Unmarshal(msg.Body, o); err != nil {
+		logrus.Infof("failed to unmarshal message from %s,err=%v", q.Name, err)
+		_ = msg.Nack(false, false)
+		return
+	}
+	if _, err := c.app.Commands.CreatePayment.Handle(context.TODO(), command.CreatePayment{
+		Order: o,
+	}); err != nil {
+		// TODO:retry
+		logrus.Infof("failed to create payment for order %s,err=%v", o.ID, err)
+		_ = msg.Nack(false, false)
+		return
+	}
 	err := msg.Ack(false)
 	if err != nil {
 		logrus.Warnf("failed to ack message from %s,err=%v", q.Name, err)
 	}
+	logrus.Infof("create payment for order %s success", o.ID)
+
 }

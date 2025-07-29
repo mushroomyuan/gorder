@@ -1,11 +1,14 @@
 package main
 
 import (
+	"context"
+
 	"github.com/mushroomyuan/gorder/common/broker"
 	"github.com/mushroomyuan/gorder/common/config"
 	"github.com/mushroomyuan/gorder/common/logging"
 	"github.com/mushroomyuan/gorder/common/server"
 	"github.com/mushroomyuan/gorder/payment/infrastructure/consumer"
+	"github.com/mushroomyuan/gorder/payment/service"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 )
@@ -23,6 +26,12 @@ func main() {
 	serverName := viper.GetString("payment.service-name")
 	logrus.Infof("serverType: %s, serverName: %s", serverType, serverName)
 
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	application, cleanup := service.NewApplication(ctx)
+	defer cleanup()
+
 	ch, closeCh := broker.Connect(
 		viper.GetString("rabbitmq.user"),
 		viper.GetString("rabbitmq.password"),
@@ -35,9 +44,9 @@ func main() {
 		_ = closeCh()
 	}()
 
-	go consumer.NewConsumer().Listen(ch)
+	go consumer.NewConsumer(application).Listen(ch)
 
-	paymentHandler := NewPaymentHandler()
+	paymentHandler := NewPaymentHandler(ch)
 	switch serverType {
 	case "http":
 		server.RunHTTPServer(serverName, paymentHandler.RegisterRoutes)

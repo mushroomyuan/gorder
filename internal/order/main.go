@@ -9,9 +9,11 @@ import (
 	"github.com/mushroomyuan/gorder/common/genproto/orderpb"
 	"github.com/mushroomyuan/gorder/common/logging"
 	"github.com/mushroomyuan/gorder/common/server"
+	"github.com/mushroomyuan/gorder/order/infrastructure/consumer"
 	"github.com/mushroomyuan/gorder/order/ports"
 	"github.com/mushroomyuan/gorder/order/service"
 
+	"github.com/mushroomyuan/gorder/common/broker"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"google.golang.org/grpc"
@@ -57,6 +59,20 @@ func main() {
 		_ = deregisterFunc()
 	}()
 
+	ch, closeCh := broker.Connect(
+		viper.GetString("rabbitmq.user"),
+		viper.GetString("rabbitmq.password"),
+		viper.GetString("rabbitmq.host"),
+		viper.GetString("rabbitmq.port"),
+	)
+
+	defer func() {
+		_ = ch.Close()
+		_ = closeCh()
+	}()
+
+	go consumer.NewConsumer(application).Listen(ch)
+
 	go server.RunGRPCServer(serviceName, func(server *grpc.Server) {
 		svc := ports.NewGRPCServer(application)
 		orderpb.RegisterOrderServiceServer(server, svc)
@@ -64,6 +80,7 @@ func main() {
 
 	// 启动http服务
 	server.RunHTTPServer(serviceName, func(router *gin.Engine) {
+		router.StaticFile("/success", "../../public/success.html")
 		ports.RegisterHandlersWithOptions(router, &HTTPServer{
 			app: application,
 		}, ports.GinServerOptions{

@@ -3,11 +3,11 @@ package service
 import (
 	"context"
 
+	"github.com/mushroomyuan/gorder/common/metrics"
 	"github.com/mushroomyuan/gorder/stock/adapters"
 	"github.com/mushroomyuan/gorder/stock/app"
 	"github.com/mushroomyuan/gorder/stock/app/query"
 	"github.com/sirupsen/logrus"
-	"github.com/mushroomyuan/gorder/common/metrics"
 )
 
 func NewApplication(ctx context.Context) app.Application {

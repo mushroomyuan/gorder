@@ -39,7 +39,7 @@ type Registry struct {
 	client *consul.Client
 }
 
-func (r *Registry) Register(_ context.Context, instanceId, serviceName, hostPort string) error {
+func (r *Registry) Register(_ context.Context, instanceID, serviceName, hostPort string) error {
 	parts := strings.Split(hostPort, ":")
 	if len(parts) != 2 {
 		return errors.New("invalid host:port format")
@@ -50,12 +50,12 @@ func (r *Registry) Register(_ context.Context, instanceId, serviceName, hostPort
 		return fmt.Errorf("invalid port format: %w", err)
 	}
 	return r.client.Agent().ServiceRegister(&consul.AgentServiceRegistration{
-		ID:      instanceId,
+		ID:      instanceID,
 		Name:    serviceName,
 		Port:    port,
 		Address: host,
 		Check: &consul.AgentServiceCheck{
-			CheckID:                        instanceId,
+			CheckID:                        instanceID,
 			TLSSkipVerify:                  false,
 			TTL:                            "5s",
 			Timeout:                        "5s",
@@ -65,12 +65,12 @@ func (r *Registry) Register(_ context.Context, instanceId, serviceName, hostPort
 	})
 }
 
-func (r *Registry) DeRegister(_ context.Context, instanceId, serviceName string) error {
+func (r *Registry) DeRegister(_ context.Context, instanceID, serviceName string) error {
 	logrus.WithFields(logrus.Fields{
-		"instanceId":  instanceId,
+		"instanceID":  instanceID,
 		"serviceName": serviceName,
 	}).Info("DeRegister from consul")
-	return r.client.Agent().CheckDeregister(instanceId)
+	return r.client.Agent().CheckDeregister(instanceID)
 }
 
 func (r *Registry) Discover(ctx context.Context, serviceName string) ([]string, error) {
@@ -85,6 +85,6 @@ func (r *Registry) Discover(ctx context.Context, serviceName string) ([]string, 
 	return ips, nil
 }
 
-func (r *Registry) HealthCheck(instanceId, serviceName string) error {
-	return r.client.Agent().UpdateTTL(instanceId, "online", consul.HealthPassing)
+func (r *Registry) HealthCheck(instanceID, serviceName string) error {
+	return r.client.Agent().UpdateTTL(instanceID, "online", consul.HealthPassing)
 }

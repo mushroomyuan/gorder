@@ -1,10 +1,11 @@
 package query
 
 import (
+	"context"
+
 	"github.com/mushroomyuan/gorder/common/decorator"
 	"github.com/mushroomyuan/gorder/common/genproto/orderpb"
 	domain "github.com/mushroomyuan/gorder/stock/domain/stock"
-	"context"
 	"github.com/sirupsen/logrus"
 )
 

@@ -2,11 +2,12 @@ package adapters
 
 import (
 	"context"
-	domain "github.com/mushroomyuan/gorder/order/domain/order"
-	"github.com/sirupsen/logrus"
 	"strconv"
 	"sync"
 	"time"
+
+	domain "github.com/mushroomyuan/gorder/order/domain/order"
+	"github.com/sirupsen/logrus"
 )
 
 type MemoryOrderRepository struct {
@@ -57,17 +58,20 @@ func (m *MemoryOrderRepository) Get(_ context.Context, id, customerID string) (*
 			return order, nil
 		}
 	}
-	return nil, domain.NotFoundError{OrderId: id}
+	return nil, domain.NotFoundError{OrderID: id}
 }
 
 func (m *MemoryOrderRepository) Update(ctx context.Context, o *domain.Order, updateFn func(context.Context, *domain.Order) (*domain.Order, error)) error {
 	m.lock.Lock()
 	defer m.lock.Unlock()
 	found := false
+	defer func() {
+		logrus.Infof("memory_order_repo_update||found=%t||orderID=%s||customerID=%s", found, o.ID, o.CustomerID)
+	}()
 	for i, order := range m.store {
 		if order.ID == o.ID && order.CustomerID == o.CustomerID {
 			found = true
-			updateOrder, err := updateFn(ctx, order)
+			updateOrder, err := updateFn(ctx, o)
 			if err != nil {
 				return err
 			}
@@ -75,7 +79,7 @@ func (m *MemoryOrderRepository) Update(ctx context.Context, o *domain.Order, upd
 		}
 	}
 	if !found {
-		return domain.NotFoundError{OrderId: o.ID}
+		return domain.NotFoundError{OrderID: o.ID}
 	}
 	return nil
 }

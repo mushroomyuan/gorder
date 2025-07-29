@@ -4,16 +4,15 @@ import (
 	"context"
 
 	"github.com/mushroomyuan/gorder/common/config"
+	"github.com/mushroomyuan/gorder/common/discovery"
 	"github.com/mushroomyuan/gorder/common/genproto/stockpb"
-	"github.com/mushroomyuan/gorder/common/server"
 	"github.com/mushroomyuan/gorder/common/logging"
+	"github.com/mushroomyuan/gorder/common/server"
 	"github.com/mushroomyuan/gorder/stock/ports"
 	"github.com/mushroomyuan/gorder/stock/service"
-	"github.com/mushroomyuan/gorder/common/discovery"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"google.golang.org/grpc"
-
 )
 
 func init() {
@@ -34,10 +33,10 @@ func main() {
 	if err != nil {
 		logrus.Fatal(err)
 	}
-	defer func(){
-		_=deregisterFunc()
+	defer func() {
+		_ = deregisterFunc()
 	}()
-	
+
 	switch serviceType {
 	case "grpc":
 		server.RunGRPCServer(serviceName, func(server *grpc.Server) {

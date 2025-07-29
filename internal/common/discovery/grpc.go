@@ -3,7 +3,7 @@ package discovery
 import (
 	"context"
 	"fmt"
-	"math/rand/v2"
+	rand "math/rand/v2"
 	"time"
 
 	"github.com/mushroomyuan/gorder/common/discovery/consul"
@@ -18,16 +18,16 @@ func RegistryToConsul(ctx context.Context, serviceName string) (func() error, er
 			return nil
 		}, err
 	}
-	instanceId := generateInstanceId(serviceName)
+	instanceID := generateInstanceID(serviceName)
 	grpcAddr := viper.Sub(serviceName).GetString("grpc-addr")
-	if err := registry.Register(ctx, instanceId, serviceName, grpcAddr); err != nil {
+	if err := registry.Register(ctx, instanceID, serviceName, grpcAddr); err != nil {
 		return func() error {
 			return nil
 		}, err
 	}
 	go func() {
 		for {
-			if err := registry.HealthCheck(instanceId, serviceName); err != nil {
+			if err := registry.HealthCheck(instanceID, serviceName); err != nil {
 				logrus.Panicf("no heart beat from %s to registry,err=%v", serviceName, err)
 			}
 			time.Sleep(time.Second * 1)
@@ -39,7 +39,7 @@ func RegistryToConsul(ctx context.Context, serviceName string) (func() error, er
 		"addr":        grpcAddr,
 	}).Info("Registry to consul success")
 	return func() error {
-		return registry.DeRegister(ctx, instanceId, serviceName)
+		return registry.DeRegister(ctx, instanceID, serviceName)
 	}, nil
 }
 

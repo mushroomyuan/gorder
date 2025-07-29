@@ -7,11 +7,10 @@ type Application struct {
 	Queries  Queries
 }
 
-type Commands struct{
-	
+type Commands struct {
 }
 
 type Queries struct {
 	CheckIfItemsInStock query.CheckIfItemsInStockHandler
-	GetItems query.GetItemsHandler
+	GetItems            query.GetItemsHandler
 }

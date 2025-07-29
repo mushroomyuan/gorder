@@ -33,7 +33,7 @@ func (G GRPCServer) CreateOrder(ctx context.Context, request *orderpb.CreateOrde
 		return nil, status.Errorf(codes.Internal, "failed to create order: %v", err.Error())
 	}
 
-	return
+	return nil, err
 }
 
 func (G GRPCServer) GetOrder(ctx context.Context, request *orderpb.GetOrderRequest) (*orderpb.Order, error) {
@@ -53,7 +53,7 @@ func (G GRPCServer) UpdataOrder(ctx context.Context, request *orderpb.Order) (_ 
 	order, err := domain.NewOrder(request.ID, request.CustomerID, request.Status, request.PaymentLink, request.Items)
 	if err != nil {
 		err = status.Errorf(codes.Internal, "failed to update order: %v", err.Error())
-		return
+		return nil, err
 	}
 	_, err = G.app.Commands.UpdateOrder.Handle(ctx, command.UpdateOrder{
 		Order: order,
@@ -61,5 +61,5 @@ func (G GRPCServer) UpdataOrder(ctx context.Context, request *orderpb.Order) (_ 
 			return order, nil
 		},
 	})
-	return
+	return nil, err
 }
