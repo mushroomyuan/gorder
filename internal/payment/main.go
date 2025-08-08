@@ -7,6 +7,7 @@ import (
 	"github.com/mushroomyuan/gorder/common/config"
 	"github.com/mushroomyuan/gorder/common/logging"
 	"github.com/mushroomyuan/gorder/common/server"
+	"github.com/mushroomyuan/gorder/common/tracing"
 	"github.com/mushroomyuan/gorder/payment/infrastructure/consumer"
 	"github.com/mushroomyuan/gorder/payment/service"
 	"github.com/sirupsen/logrus"
@@ -23,11 +24,17 @@ func init() {
 func main() {
 
 	serverType := viper.GetString("payment.server-to-run")
-	serverName := viper.GetString("payment.service-name")
-	logrus.Infof("serverType: %s, serverName: %s", serverType, serverName)
+	serviceName := viper.GetString("payment.service-name")
+	logrus.Infof("serverType: %s, serviceName: %s", serverType, serviceName)
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
+
+	shutdown, err := tracing.InitJaegerProvider(viper.GetString("jaeger.url"), serviceName)
+	if err != nil {
+		logrus.Fatal(err)
+	}
+	defer shutdown(ctx)
 
 	application, cleanup := service.NewApplication(ctx)
 	defer cleanup()
@@ -49,7 +56,7 @@ func main() {
 	paymentHandler := NewPaymentHandler(ch)
 	switch serverType {
 	case "http":
-		server.RunHTTPServer(serverName, paymentHandler.RegisterRoutes)
+		server.RunHTTPServer(serviceName, paymentHandler.RegisterRoutes)
 	case "grpc":
 		//TODO: implement me
 		logrus.Panic("work in progress")

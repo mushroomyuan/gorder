@@ -1,5 +1,8 @@
 fullback-grpc-addr: 127.0.0.1:3030
 dial-grpc-timeout: 10
+jaeger :
+  # url: "http://127.0.0.1:14268/api/traces"
+  url: "127.0.0.1:4318"
 order:
   service-name: order
   server-to-run: http
