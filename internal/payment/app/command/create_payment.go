@@ -5,6 +5,7 @@ import (
 
 	"github.com/mushroomyuan/gorder/common/decorator"
 	"github.com/mushroomyuan/gorder/common/genproto/orderpb"
+	"github.com/mushroomyuan/gorder/common/tracing"
 	domain "github.com/mushroomyuan/gorder/payment/domain"
 	"github.com/sirupsen/logrus"
 )
@@ -43,6 +44,9 @@ func NewCreatePaymentHandler(
 }
 
 func (c createPaymentHandler) Handle(ctx context.Context, cmd CreatePayment) (string, error) {
+	_, span := tracing.Start(ctx, "create_payment")
+	defer span.End()
+
 	paymentLink, err := c.processor.CreatePaymentLink(ctx, cmd.Order)
 	if err != nil {
 		return "", err

@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 
@@ -14,6 +15,7 @@ import (
 	"github.com/spf13/viper"
 	stripe "github.com/stripe/stripe-go/v82"
 	"github.com/stripe/stripe-go/v82/webhook"
+	"go.opentelemetry.io/otel"
 	"golang.org/x/net/context"
 )
 
@@ -80,10 +82,16 @@ func (h *PaymentHandler) HandleWebhook(c *gin.Context) {
 				return
 			}
 
-			h.channel.PublishWithContext(ctx, broker.EventOrderPaid, "", false, false, amqp.Publishing{
+			t := otel.Tracer("rabbitmq")
+			mqCtx, span := t.Start(ctx, fmt.Sprintf("rabbitmq.%s.publish", broker.EventOrderPaid))
+			defer span.End()
+
+			headers := broker.InjectRabbitMQHeaders(mqCtx)
+			h.channel.PublishWithContext(mqCtx, broker.EventOrderPaid, "", false, false, amqp.Publishing{
 				ContentType:  "application/json",
 				DeliveryMode: amqp.Persistent,
 				Body:         marshalledOrder,
+				Headers:      headers,
 			})
 			logrus.Infof("message published to %s,body :%s", broker.EventOrderPaid, string(marshalledOrder))
 		}

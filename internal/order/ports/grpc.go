@@ -7,6 +7,7 @@ import (
 	"github.com/mushroomyuan/gorder/order/app"
 	"github.com/mushroomyuan/gorder/order/app/command"
 	"github.com/mushroomyuan/gorder/order/app/query"
+	"github.com/mushroomyuan/gorder/order/convertor"
 	domain "github.com/mushroomyuan/gorder/order/domain/order"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc/codes"
@@ -27,7 +28,7 @@ func (G GRPCServer) CreateOrder(ctx context.Context, request *orderpb.CreateOrde
 
 	_, err = G.app.Commands.CreateOrder.Handle(ctx, command.CreateOrder{
 		CustomerID: request.CustomerID,
-		Items:      request.Items,
+		Items:      convertor.NewItemWithQuantityConvertor().ProtosToEntities(request.Items),
 	})
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to create order: %v", err.Error())
@@ -45,12 +46,17 @@ func (G GRPCServer) GetOrder(ctx context.Context, request *orderpb.GetOrderReque
 	if err != nil {
 		return nil, status.Errorf(codes.NotFound, "order not found: %v", err.Error())
 	}
-	return order.ToProto(), nil
+	return convertor.NewOrderConvertor().EntityToProto(order), nil
 }
 
 func (G GRPCServer) UpdataOrder(ctx context.Context, request *orderpb.Order) (_ *emptypb.Empty, err error) {
 	logrus.Infof("order_grpc||update_order||request_in||request=%v", request)
-	order, err := domain.NewOrder(request.ID, request.CustomerID, request.Status, request.PaymentLink, request.Items)
+	order, err := domain.NewOrder(
+		request.ID,
+		request.CustomerID,
+		request.Status,
+		request.PaymentLink,
+		convertor.NewItemConvertor().ProtosToEntities(request.Items))
 	if err != nil {
 		err = status.Errorf(codes.Internal, "failed to update order: %v", err.Error())
 		return nil, err
