@@ -44,6 +44,7 @@ func NewCreatePaymentHandler(
 }
 
 func (c createPaymentHandler) Handle(ctx context.Context, cmd CreatePayment) (string, error) {
+	// return "test-retry-link", errors.New("test retry error")
 	_, span := tracing.Start(ctx, "create_payment")
 	defer span.End()
 

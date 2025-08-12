@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/mushroomyuan/gorder/common/broker"
-	"github.com/mushroomyuan/gorder/common/config"
+	_ "github.com/mushroomyuan/gorder/common/config"
 	"github.com/mushroomyuan/gorder/common/logging"
 	"github.com/mushroomyuan/gorder/common/server"
 	"github.com/mushroomyuan/gorder/common/tracing"
@@ -16,9 +16,6 @@ import (
 
 func init() {
 	logging.Init()
-	if err := config.NewViperConfig(); err != nil {
-		logrus.Fatal(err)
-	}
 }
 
 func main() {

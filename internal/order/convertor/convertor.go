@@ -36,7 +36,7 @@ func (c *OrderConvertor) ProtoToEntity(o *orderpb.Order) *domain.Order {
 func (c *OrderConvertor) EntityToClient(o *domain.Order) *client.Order {
 	c.check(o)
 	return &client.Order{
-		CustomerID:  o.CustomerID,
+		CustomerId:  o.CustomerID,
 		Id:          o.ID,
 		Status:      o.Status,
 		PaymentLink: o.PaymentLink,
@@ -47,7 +47,7 @@ func (c *OrderConvertor) EntityToClient(o *domain.Order) *client.Order {
 func (c *OrderConvertor) ClientToEntity(o *client.Order) *domain.Order {
 	c.check(o)
 	return &domain.Order{
-		CustomerID:  o.CustomerID,
+		CustomerID:  o.CustomerId,
 		ID:          o.Id,
 		Status:      o.Status,
 		PaymentLink: o.PaymentLink,
@@ -105,7 +105,7 @@ func (c *ItemConvertor) EntityToClient(e *entity.Item) client.Item {
 		Id:       e.ID,
 		Name:     e.Name,
 		Quantity: e.Quantity,
-		PriceID:  e.PriceID,
+		PriceId:  e.PriceID,
 	}
 }
 
@@ -121,7 +121,7 @@ func (c *ItemConvertor) ClientToEntity(e client.Item) *entity.Item {
 		ID:       e.Id,
 		Name:     e.Name,
 		Quantity: e.Quantity,
-		PriceID:  e.PriceID,
+		PriceID:  e.PriceId,
 	}
 }
 

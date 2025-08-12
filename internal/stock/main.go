@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 
-	"github.com/mushroomyuan/gorder/common/config"
+	_ "github.com/mushroomyuan/gorder/common/config"
 	"github.com/mushroomyuan/gorder/common/discovery"
 	"github.com/mushroomyuan/gorder/common/genproto/stockpb"
 	"github.com/mushroomyuan/gorder/common/logging"
@@ -18,9 +18,6 @@ import (
 
 func init() {
 	logging.Init()
-	if err := config.NewViperConfig(); err != nil {
-		logrus.Fatal(err)
-	}
 }
 
 func main() {

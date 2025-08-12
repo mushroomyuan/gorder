@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/gin-gonic/gin"
-	"github.com/mushroomyuan/gorder/common/config"
+	_ "github.com/mushroomyuan/gorder/common/config"
 	"github.com/mushroomyuan/gorder/common/discovery"
 	"github.com/mushroomyuan/gorder/common/genproto/orderpb"
 	"github.com/mushroomyuan/gorder/common/logging"
@@ -22,9 +22,6 @@ import (
 
 func init() {
 	logging.Init()
-	if err := config.NewViperConfig(); err != nil {
-		logrus.Fatal(err)
-	}
 }
 
 func main() {
