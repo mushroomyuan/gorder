@@ -1,6 +1,7 @@
 package common
 
 import (
+	"encoding/json"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -25,20 +26,27 @@ func (base *BaseResponse) Response(ctx *gin.Context, err error, data any) {
 }
 
 func (base *BaseResponse) success(ctx *gin.Context, data any) {
-	ctx.JSON(http.StatusOK, response{
+	r := response{
 		Errno:   0,
 		Message: "success",
 		Data:    data,
 		TraceID: tracing.TraceID(ctx.Request.Context()),
-	})
+	}
 
+	resp, _ := json.Marshal(r)
+	ctx.Set("response", string(resp))
+	ctx.JSON(http.StatusOK, r)
 }
 
 func (base *BaseResponse) error(ctx *gin.Context, err error) {
-	ctx.JSON(http.StatusOK, response{
+	r := response{
 		Errno:   2,
 		Message: err.Error(),
 		Data:    nil,
 		TraceID: tracing.TraceID(ctx.Request.Context()),
-	})
+	}
+
+	resp, _ := json.Marshal(r)
+	ctx.Set("response", string(resp))
+	ctx.JSON(http.StatusOK, r)
 }

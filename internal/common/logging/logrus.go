@@ -5,16 +5,11 @@ import (
 	"strconv"
 
 	"github.com/sirupsen/logrus"
-	prefixed "github.com/x-cray/logrus-prefixed-formatter"
 )
 
 func Init() {
 	SetFormatter(logrus.StandardLogger())
 	logrus.SetLevel(logrus.DebugLevel)
-}
-
-func NewLogrusLogger() *logrus.Logger {
-	return logrus.New()
 }
 
 func SetFormatter(logger *logrus.Logger) {
@@ -27,11 +22,9 @@ func SetFormatter(logger *logrus.Logger) {
 		},
 	})
 	if isLocal, _ := strconv.ParseBool(os.Getenv("LOCAL_ENV")); isLocal {
-		logger.SetFormatter(&prefixed.TextFormatter{
-			ForceFormatting: true,
-			FullTimestamp:   true,
-			TimestampFormat: "2006-01-02 15:04:05",
-		})
+		//logger.SetFormatter(&prefixed.TextFormatter{
+		//	ForceFormatting: false,
+		//})
 	}
 }
 

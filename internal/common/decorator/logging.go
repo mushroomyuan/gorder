@@ -2,6 +2,7 @@ package decorator
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"strings"
 
@@ -14,9 +15,10 @@ type QueryLoggingDecorator[C, R any] struct {
 }
 
 func (q QueryLoggingDecorator[C, R]) Handle(ctx context.Context, cmd C) (result R, err error) {
+	body, _ := json.Marshal(cmd)
 	logger := q.logger.WithFields(logrus.Fields{
 		"query":      generateActionName(cmd),
-		"query_body": fmt.Sprintf("%#v", cmd),
+		"query_body": string(body),
 	})
 	logger.Debug("Executing query")
 	defer func() {
@@ -24,6 +26,28 @@ func (q QueryLoggingDecorator[C, R]) Handle(ctx context.Context, cmd C) (result 
 			logger.Info("Query execute successfully!")
 		} else {
 			logger.Errorf("Fail to execute query: %s", err)
+		}
+	}()
+	return q.base.Handle(ctx, cmd)
+}
+
+type CommandLoggingDecorator[C, R any] struct {
+	logger *logrus.Entry
+	base   CommandHandler[C, R]
+}
+
+func (q CommandLoggingDecorator[C, R]) Handle(ctx context.Context, cmd C) (result R, err error) {
+	body, _ := json.Marshal(cmd)
+	logger := q.logger.WithFields(logrus.Fields{
+		"command":      generateActionName(cmd),
+		"command_body": string(body),
+	})
+	logger.Debug("Executing command")
+	defer func() {
+		if err == nil {
+			logger.Info("Command execute successfully!")
+		} else {
+			logger.Errorf("Fail to execute command: %s", err)
 		}
 	}()
 	return q.base.Handle(ctx, cmd)

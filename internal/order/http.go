@@ -18,20 +18,20 @@ type HTTPServer struct {
 	app app.Application
 }
 
-func (H HTTPServer) PostCustomerCustomerIdOrders(c *gin.Context, customerID string) {
+func (s *HTTPServer) PostCustomerCustomerIdOrders(c *gin.Context, customerID string) {
 	var (
 		req  client.CreateOrderRequest
 		resp dto.CreateOrderResponse
 		err  error
 	)
 	defer func() {
-		H.Response(c, err, &resp)
+		s.Response(c, err, &resp)
 	}()
 
 	if err = c.ShouldBindJSON(&req); err != nil {
 		return
 	}
-	r, err := H.app.Commands.CreateOrder.Handle(c.Request.Context(), command.CreateOrder{
+	r, err := s.app.Commands.CreateOrder.Handle(c.Request.Context(), command.CreateOrder{
 		CustomerID: req.CustomerId,
 		Items:      convertor.NewItemWithQuantityConvertor().ClientsToEntities(req.Items),
 	})

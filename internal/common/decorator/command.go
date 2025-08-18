@@ -11,9 +11,9 @@ type CommandHandler[C, R any] interface {
 }
 
 func ApplyCommandDecorators[C, R any](handler CommandHandler[C, R], logger *logrus.Entry, metricsClient MetricsClient) CommandHandler[C, R] {
-	return QueryLoggingDecorator[C, R]{
+	return CommandLoggingDecorator[C, R]{
 		logger: logger,
-		base: QueryMetricsDecorator[C, R]{
+		base: CommandMetricsDecorator[C, R]{
 			base:   handler,
 			client: metricsClient,
 		},

@@ -128,21 +128,21 @@
         }
       }
        */
-      console.log("data.data.status = ", data.data.Status);
+      console.log("data.data.status = ", data.data.Order.status);
       
-      if (data.data.Status === 'waiting for payment') {
+      if (data.data.Order.status === 'waiting for payment') {
         console.log("XXX");
         
           order.status = '等待支付...';
           document.getElementById('orderStatus').innerText = order.status;
           document.querySelector('.after-payment-popup').style.display = 'block';
-          document.getElementById('payment-link').href = data.data.PaymentLink;
+          document.getElementById('payment-link').href = data.data.Order.payment_link;
       }
-      if (data.data.Status === 'paid') {
+      if (data.data.Order.status === 'paid') {
           order.status = '已支付成功，请等待...';
           document.getElementById('orderStatus').innerText = order.status;
           setTimeout(getOrder, 5000);
-      } else if (data.data.Status === 'ready') {
+      } else if (data.data.Order.status === 'ready') {
           order.status = '已完成...';
           document.querySelector('.after-payment-popup').style.display = 'none';
           document.querySelector('.ready-popup').style.display = 'block';
