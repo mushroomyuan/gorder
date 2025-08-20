@@ -14,8 +14,8 @@ import (
 )
 
 var (
-	dbName   = viper.GetString("monogo.db-name")
-	collName = viper.GetString("monogo.coll-name")
+	dbName   = viper.GetString("mongo.db-name")
+	collName = viper.GetString("mongo.coll-name")
 )
 
 type OrderRepositoryMongo struct {
@@ -31,7 +31,7 @@ func (m *OrderRepositoryMongo) collection() *mongo.Collection {
 }
 
 type orderModel struct {
-	MonogoID    primitive.ObjectID `bson:"_id"`
+	MongoID     primitive.ObjectID `bson:"_id"`
 	ID          string             `bson:"id"`
 	CustomerID  string             `bson:"customer_id"`
 	Status      string             `bson:"status"`
@@ -41,7 +41,7 @@ type orderModel struct {
 
 func (m *OrderRepositoryMongo) marshalToModel(order *domain.Order) *orderModel {
 	return &orderModel{
-		MonogoID:    primitive.NewObjectID(),
+		MongoID:     primitive.NewObjectID(),
 		ID:          order.ID,
 		CustomerID:  order.CustomerID,
 		Status:      order.Status,
@@ -66,7 +66,7 @@ func (*OrderRepositoryMongo) logWithTag(tag string, err error, result any) {
 
 func (m *OrderRepositoryMongo) unmarshal(o *orderModel) *domain.Order {
 	return &domain.Order{
-		ID:          o.MonogoID.Hex(),
+		ID:          o.MongoID.Hex(),
 		CustomerID:  o.CustomerID,
 		Status:      o.Status,
 		PaymentLink: o.PaymentLink,
@@ -94,7 +94,7 @@ func (m *OrderRepositoryMongo) Get(ctx context.Context, id, customerID string) (
 	if err = m.collection().FindOne(ctx, cond).Decode(read); err != nil {
 		return
 	}
-	if len(read.MonogoID) == 0 {
+	if len(read.MongoID) == 0 {
 		return nil, domain.NotFoundError{OrderID: id}
 	}
 	return m.unmarshal(read), nil

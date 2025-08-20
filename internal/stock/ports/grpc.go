@@ -1,12 +1,15 @@
 package ports
 
 import (
-	context "context"
+	"context"
 
 	"github.com/mushroomyuan/gorder/common/genproto/stockpb"
 	"github.com/mushroomyuan/gorder/common/tracing"
 	"github.com/mushroomyuan/gorder/stock/app"
 	"github.com/mushroomyuan/gorder/stock/app/query"
+	"github.com/mushroomyuan/gorder/stock/convertor"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 //func NewGRPCServer() *GRPCServer {
@@ -25,14 +28,14 @@ func (G GRPCServer) GetItems(ctx context.Context, request *stockpb.GetItemsReque
 	_, span := tracing.Start(ctx, "GetItems")
 	defer span.End()
 
-	items, err := G.app.Queries.GetItems.Handle(ctx, query.GetItems{
+	res, err := G.app.Queries.GetItems.Handle(ctx, query.GetItems{
 		ItemIDs: request.ItemsIDs,
 	})
 	if err != nil {
 		return nil, err
 	}
 	return &stockpb.GetItemsResponse{
-		Items: items.Items,
+		Items: convertor.NewItemConvertor().EntitiesToProtos(res.Items),
 	}, nil
 }
 
@@ -40,12 +43,14 @@ func (G GRPCServer) CheckIfItemsInStock(ctx context.Context, request *stockpb.Ch
 	_, span := tracing.Start(ctx, "CheckIfItemsInStock")
 	defer span.End()
 
-	items, err := G.app.Queries.CheckIfItemsInStock.Handle(ctx, query.CheckIfItemsInStock{Items: request.Items})
+	items, err := G.app.Queries.CheckIfItemsInStock.Handle(ctx, query.CheckIfItemsInStock{
+		Items: convertor.NewItemWithQuantityConvertor().ProtosToEntities(request.Items),
+	})
 	if err != nil {
-		return nil, err
+		return nil, status.Error(codes.Internal, err.Error())
 	}
 	return &stockpb.CheckIfItemsInStockResponse{
 		InStock: 1,
-		Items:   items.Items,
+		Items:   convertor.NewItemConvertor().EntitiesToProtos(items),
 	}, nil
 }

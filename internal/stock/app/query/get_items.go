@@ -4,8 +4,8 @@ import (
 	"context"
 
 	"github.com/mushroomyuan/gorder/common/decorator"
-	"github.com/mushroomyuan/gorder/common/genproto/orderpb"
 	domain "github.com/mushroomyuan/gorder/stock/domain/stock"
+	"github.com/mushroomyuan/gorder/stock/entity"
 	"github.com/sirupsen/logrus"
 )
 
@@ -14,7 +14,7 @@ type GetItems struct {
 }
 
 type GetItemsResult struct {
-	Items []*orderpb.Item
+	Items []*entity.Item
 }
 
 type GetItemsHandler decorator.QueryHandler[GetItems, *GetItemsResult]

@@ -46,7 +46,7 @@ func (c *Consumer) handleMessge(ch *amqp.Channel, msg amqp.Delivery, q amqp.Queu
 	logrus.Infof("Payment receive a message from %s,msg = %s", q.Name, string(msg.Body))
 	ctx := broker.ExtractRabbitMQHeaders(context.Background(), msg.Headers)
 	t := otel.Tracer("rabbitmq")
-	_, span := t.Start(ctx, fmt.Sprintf("rabbitmq.%s.consume", q.Name))
+	mqCtx, span := t.Start(ctx, fmt.Sprintf("rabbitmq.%s.consume", q.Name))
 	defer span.End()
 
 	var err error
@@ -64,11 +64,11 @@ func (c *Consumer) handleMessge(ch *amqp.Channel, msg amqp.Delivery, q amqp.Queu
 
 		return
 	}
-	if _, err := c.app.Commands.CreatePayment.Handle(ctx, command.CreatePayment{
+	if _, err := c.app.Commands.CreatePayment.Handle(mqCtx, command.CreatePayment{
 		Order: o,
 	}); err != nil {
 		logrus.Infof("failed to create payment for order %s,err=%v", o.ID, err)
-		if err = broker.HandleRetry(ctx, ch, &msg); err != nil {
+		if err = broker.HandleRetry(mqCtx, ch, &msg); err != nil {
 			logrus.Warnf("retry_error,error handling retry,messageID=%s,error=%v", msg.MessageId, err)
 		}
 

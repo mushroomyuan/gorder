@@ -62,10 +62,10 @@ func newApplication(_ context.Context, stockGRPC query.StockService, ch *amqp.Ch
 func newMongoClient() *mongo.Client {
 	uri := fmt.Sprintf(
 		"mongodb://%s:%s@%s:%s",
-		viper.GetString("monogo.user"),
-		viper.GetString("monogo.password"),
-		viper.GetString("monogo.host"),
-		viper.GetString("monogo.port"),
+		viper.GetString("mongo.user"),
+		viper.GetString("mongo.password"),
+		viper.GetString("mongo.host"),
+		viper.GetString("mongo.port"),
 	)
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()

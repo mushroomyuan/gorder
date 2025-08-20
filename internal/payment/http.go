@@ -88,7 +88,7 @@ func (h *PaymentHandler) HandleWebhook(c *gin.Context) {
 			defer span.End()
 
 			headers := broker.InjectRabbitMQHeaders(mqCtx)
-			h.channel.PublishWithContext(mqCtx, broker.EventOrderPaid, "", false, false, amqp.Publishing{
+			_ = h.channel.PublishWithContext(mqCtx, broker.EventOrderPaid, "", false, false, amqp.Publishing{
 				ContentType:  "application/json",
 				DeliveryMode: amqp.Persistent,
 				Body:         marshalledOrder,
