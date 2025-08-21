@@ -32,7 +32,7 @@ func (G GRPCServer) GetItems(ctx context.Context, request *stockpb.GetItemsReque
 		ItemIDs: request.ItemsIDs,
 	})
 	if err != nil {
-		return nil, err
+		return nil, status.Error(codes.Internal, err.Error())
 	}
 	return &stockpb.GetItemsResponse{
 		Items: convertor.NewItemConvertor().EntitiesToProtos(res.Items),

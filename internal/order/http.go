@@ -6,6 +6,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/mushroomyuan/gorder/common"
 	client "github.com/mushroomyuan/gorder/common/client/order"
+	"github.com/mushroomyuan/gorder/common/consts"
+	"github.com/mushroomyuan/gorder/common/handler/errors"
 	"github.com/mushroomyuan/gorder/order/app"
 	"github.com/mushroomyuan/gorder/order/app/command"
 	"github.com/mushroomyuan/gorder/order/app/dto"
@@ -29,9 +31,11 @@ func (s *HTTPServer) PostCustomerCustomerIdOrders(c *gin.Context, customerID str
 	}()
 
 	if err = c.ShouldBindJSON(&req); err != nil {
+		err = errors.NewWithMsg(consts.ErrnoBindRequestError, err.Error())
 		return
 	}
 	if err = s.validate(req); err != nil {
+		err = errors.NewWithErr(consts.ErrnoRequestValidateError, err)
 		return
 	}
 	r, err := s.app.Commands.CreateOrder.Handle(c.Request.Context(), command.CreateOrder{

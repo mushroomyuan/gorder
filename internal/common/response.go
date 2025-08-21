@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/mushroomyuan/gorder/common/handler/errors"
 	"github.com/mushroomyuan/gorder/common/tracing"
 )
 
@@ -26,9 +27,10 @@ func (base *BaseResponse) Response(ctx *gin.Context, err error, data any) {
 }
 
 func (base *BaseResponse) success(ctx *gin.Context, data any) {
+	errno, errmsg := errors.Output(nil)
 	r := response{
-		Errno:   0,
-		Message: "success",
+		Errno:   errno,
+		Message: errmsg,
 		Data:    data,
 		TraceID: tracing.TraceID(ctx.Request.Context()),
 	}
@@ -39,9 +41,10 @@ func (base *BaseResponse) success(ctx *gin.Context, data any) {
 }
 
 func (base *BaseResponse) error(ctx *gin.Context, err error) {
+	errno, errmsg := errors.Output(err)
 	r := response{
-		Errno:   2,
-		Message: err.Error(),
+		Errno:   errno,
+		Message: errmsg,
 		Data:    nil,
 		TraceID: tracing.TraceID(ctx.Request.Context()),
 	}
