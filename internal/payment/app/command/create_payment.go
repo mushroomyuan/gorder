@@ -3,6 +3,7 @@ package command
 import (
 	"context"
 
+	"github.com/mushroomyuan/gorder/common/consts"
 	"github.com/mushroomyuan/gorder/common/convertor"
 	"github.com/mushroomyuan/gorder/common/decorator"
 	"github.com/mushroomyuan/gorder/common/entity"
@@ -26,7 +27,6 @@ type createPaymentHandler struct {
 func NewCreatePaymentHandler(
 	processor domain.Processor,
 	orderGRPC OrderService,
-	logger *logrus.Entry,
 	metricsClient decorator.MetricsClient,
 ) CreatePaymentHandler {
 	if processor == nil {
@@ -40,7 +40,6 @@ func NewCreatePaymentHandler(
 			processor: processor,
 			orderGRPC: orderGRPC,
 		},
-		logger,
 		metricsClient,
 	)
 }
@@ -61,7 +60,7 @@ func (c createPaymentHandler) Handle(ctx context.Context, cmd CreatePayment) (st
 	newOrder, err := entity.NewValidOrder(
 		cmd.Order.Items,
 		paymentLink,
-		"waiting for payment",
+		consts.OrderStatusWaitingForPayment,
 		cmd.Order.CustomerID,
 		cmd.Order.ID,
 	)

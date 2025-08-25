@@ -9,7 +9,7 @@ import (
 	"github.com/mushroomyuan/gorder/stock/app/query"
 	"github.com/mushroomyuan/gorder/stock/infrastructure/integration"
 	"github.com/mushroomyuan/gorder/stock/infrastructure/persistent"
-	"github.com/sirupsen/logrus"
+	"github.com/spf13/viper"
 )
 
 func NewApplication(_ context.Context) app.Application {
@@ -17,13 +17,17 @@ func NewApplication(_ context.Context) app.Application {
 	db := persistent.NewMySQL()
 	stockRepo := adapters.NewMySQLStockRepository(db)
 	stripeAPI := integration.NewStripeAPI()
-	logger := logrus.NewEntry(logrus.StandardLogger())
-	metricsClient := metrics.TodoMetrics{}
+
+	metricsClient := metrics.NewPrometheusMetricsClient(&metrics.PrometheusMetricsClientConfig{
+		Host:        viper.GetString("stock.metrics-export-addr"),
+		ServiceName: viper.GetString("stock.service-name"),
+	})
+
 	return app.Application{
 		Commands: app.Commands{},
 		Queries: app.Queries{
-			CheckIfItemsInStock: query.NewCheckIfItemsInStockHandler(stockRepo, stripeAPI, logger, metricsClient),
-			GetItems:            query.NewGetItemsHandler(stockRepo, logger, metricsClient),
+			CheckIfItemsInStock: query.NewCheckIfItemsInStockHandler(stockRepo, stripeAPI, metricsClient),
+			GetItems:            query.NewGetItemsHandler(stockRepo, metricsClient),
 		},
 	}
 }

@@ -43,7 +43,6 @@ type checkIfItemsInStockHandler struct {
 func NewCheckIfItemsInStockHandler(
 	stockRepo domain.Repository,
 	stripeAPI *integration.StripeAPI,
-	logger *logrus.Entry,
 	metricsClient decorator.MetricsClient,
 ) CheckIfItemsInStockHandler {
 	if stockRepo == nil {
@@ -57,7 +56,6 @@ func NewCheckIfItemsInStockHandler(
 			stockRepo: stockRepo,
 			stripeAPI: stripeAPI,
 		},
-		logger,
 		metricsClient,
 	)
 }
@@ -72,14 +70,25 @@ func (c checkIfItemsInStockHandler) Handle(ctx context.Context, query CheckIfIte
 		}
 	}()
 
+	var err error
 	var res []*entity.Item
+	defer func() {
+		f := logrus.Fields{
+			"query": query,
+			"res":   res,
+		}
+		if err != nil {
+			logging.Errorf(ctx, f, "CheckIfItemsInStock,err=%v", err)
+		} else {
+			logging.Infof(ctx, f, "%s", "CheckIfItemsInStock success")
+		}
+	}()
 	for _, item := range query.Items {
-		priceID, err := c.stripeAPI.GetPriceByProductID(ctx, item.ID)
-		if err != nil || priceID == "" {
-			logrus.Warningf("GetPriceByProductID error:itemID=%s,err= %v", item.ID, err)
+		product, err := c.stripeAPI.GetProductByID(ctx, item.ID)
+		if err != nil {
 			return nil, err
 		}
-		res = append(res, entity.NewItem(item.ID, "", item.Quantity, priceID))
+		res = append(res, entity.NewItem(item.ID, product.Name, item.Quantity, product.DefaultPrice.ID))
 	}
 
 	if err := c.checkStock(ctx, query.Items); err != nil {

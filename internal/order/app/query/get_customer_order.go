@@ -6,7 +6,6 @@ import (
 	"github.com/mushroomyuan/gorder/common/decorator"
 	"github.com/mushroomyuan/gorder/common/tracing"
 	domain "github.com/mushroomyuan/gorder/order/domain/order"
-	"github.com/sirupsen/logrus"
 )
 
 type GetCustomerOrder struct {
@@ -34,7 +33,6 @@ func (g getCustomerOrderHandler) Handle(ctx context.Context, query GetCustomerOr
 
 func NewGetCustomerOrderHandler(
 	orderRepo domain.Repository,
-	logger *logrus.Entry,
 	metricsClient decorator.MetricsClient,
 ) GetCustomerOrderHandler {
 	if orderRepo == nil {
@@ -42,7 +40,6 @@ func NewGetCustomerOrderHandler(
 	}
 	return decorator.ApplyQueryDecorators[GetCustomerOrder, *domain.Order](
 		getCustomerOrderHandler{orderRepo: orderRepo},
-		logger,
 		metricsClient,
 	)
 }

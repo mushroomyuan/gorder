@@ -126,11 +126,11 @@ func (m *OrderRepositoryMongo) Update(
 	if err != nil {
 		return
 	}
-	updated, err := updateFn(ctx, o)
+	updated, err := updateFn(ctx, oldOrder)
 	mongoID, _ := primitive.ObjectIDFromHex(oldOrder.ID)
 	_, err = m.collection().UpdateOne(
 		ctx,
-		bson.M{"_id": mongoID, "customer_id": o.CustomerID},
+		bson.M{"_id": mongoID, "customer_id": oldOrder.CustomerID},
 		bson.M{"$set": bson.M{
 			"status":       updated.Status,
 			"payment_link": updated.PaymentLink,

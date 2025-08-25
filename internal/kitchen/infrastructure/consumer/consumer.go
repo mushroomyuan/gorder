@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/mushroomyuan/gorder/common/consts"
 	"github.com/mushroomyuan/gorder/common/convertor"
 	"github.com/pkg/errors"
 
@@ -76,7 +77,7 @@ func (c *Consumer) handleMessage(ch *amqp.Channel, msg amqp.Delivery, q amqp.Que
 
 		return
 	}
-	if o.Status != "paid" {
+	if o.Status != consts.OrderStatusPaid {
 		err = errors.New("order not paid ,cannot cook")
 		return
 	}
@@ -85,7 +86,7 @@ func (c *Consumer) handleMessage(ch *amqp.Channel, msg amqp.Delivery, q amqp.Que
 	if err := c.orderGRPC.UpdateOrder(ctx, &orderpb.Order{
 		ID:          o.ID,
 		CustomerID:  o.CustomerID,
-		Status:      "ready",
+		Status:      consts.OrderStatusReady,
 		PaymentLink: o.PaymentLink,
 		Items:       convertor.NewItemConvertor().EntitiesToProtos(o.Items),
 	}); err != nil {

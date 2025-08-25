@@ -8,6 +8,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/mushroomyuan/gorder/common/broker"
+	"github.com/mushroomyuan/gorder/common/consts"
 	"github.com/mushroomyuan/gorder/common/entity"
 	"github.com/mushroomyuan/gorder/common/logging"
 	"github.com/pkg/errors"
@@ -77,18 +78,23 @@ func (h *PaymentHandler) HandleWebhook(c *gin.Context) {
 			t := otel.Tracer("rabbitmq")
 			ctx, span := t.Start(c.Request.Context(), fmt.Sprintf("rabbitmq.%s.publish", broker.EventOrderPaid))
 			defer span.End()
-
+			order, err := entity.NewValidOrder(
+				items,
+				session.Metadata["paymentLink"],
+				consts.OrderStatusPaid,
+				session.Metadata["customerID"],
+				session.Metadata["orderID"],
+			)
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, err.Error())
+				return
+			}
 			err = broker.PublishEvent(ctx, broker.PublishEventReq{
 				Channel:  h.channel,
 				Routing:  broker.FanOut,
 				Queue:    "",
 				Exchange: broker.EventOrderPaid,
-				Body: entity.NewValidOrder(
-					items, session.Metadata["paymentLink"],
-					string(stripe.CheckoutSessionPaymentStatusPaid),
-					session.Metadata["customerID"],
-					session.Metadata["orderID"],
-				),
+				Body:     order,
 			})
 			if err != nil {
 				c.JSON(http.StatusInternalServerError, gin.H{

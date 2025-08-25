@@ -43,11 +43,14 @@ func NewApplication(ctx context.Context) (app app.Application, cleanup func()) {
 
 func newApplication(_ context.Context, orderGRPC command.OrderService, processor domain.Processor) app.Application {
 
-	logger := logrus.NewEntry(logrus.StandardLogger())
-	metricsClient := metrics.TodoMetrics{}
+	metricsClient := metrics.NewPrometheusMetricsClient(&metrics.PrometheusMetricsClientConfig{
+		Host:        viper.GetString("payment.metrics-export-addr"),
+		ServiceName: viper.GetString("payment.service-name"),
+	})
+
 	return app.Application{
 		Commands: app.Commands{
-			CreatePayment: command.NewCreatePaymentHandler(processor, orderGRPC, logger, metricsClient),
+			CreatePayment: command.NewCreatePaymentHandler(processor, orderGRPC, metricsClient),
 		},
 	}
 }

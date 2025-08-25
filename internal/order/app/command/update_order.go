@@ -6,7 +6,6 @@ import (
 	"github.com/mushroomyuan/gorder/common/decorator"
 	"github.com/mushroomyuan/gorder/common/logging"
 	domain "github.com/mushroomyuan/gorder/order/domain/order"
-	"github.com/sirupsen/logrus"
 )
 
 type UpdateOrder struct {
@@ -25,7 +24,7 @@ func (u updateOrderHandler) Handle(ctx context.Context, cmd UpdateOrder) (any, e
 	var err error
 	defer logging.WhenCommandExecuted(ctx, "UpdateOrderHandler", cmd, err)
 	if cmd.UpdateFn == nil {
-		logrus.Panicf("UpdateOrder handler must have UpdateOrder function,cmd=%+v", cmd)
+		logging.Panicf(ctx, nil, "UpdateOrder handler must have UpdateOrder function,cmd=%+v", cmd)
 	}
 	if err = u.orderRepo.Update(ctx, cmd.Order, cmd.UpdateFn); err != nil {
 		return nil, err
@@ -35,7 +34,6 @@ func (u updateOrderHandler) Handle(ctx context.Context, cmd UpdateOrder) (any, e
 
 func NewUpdateOrderHandler(
 	orderRepo domain.Repository,
-	logger *logrus.Entry,
 	metricsClient decorator.MetricsClient,
 ) UpdateOrderHandler {
 	if orderRepo == nil {
@@ -43,7 +41,6 @@ func NewUpdateOrderHandler(
 	}
 	return decorator.ApplyCommandDecorators[UpdateOrder, any](
 		updateOrderHandler{orderRepo: orderRepo},
-		logger,
 		metricsClient,
 	)
 }

@@ -6,15 +6,61 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/lestrrat-go/file-rotatelogs"
 	"github.com/mushroomyuan/gorder/common/tracing"
+	"github.com/rifflock/lfshook"
 	"github.com/sirupsen/logrus"
-	prefixed "github.com/x-cray/logrus-prefixed-formatter"
 )
 
 func Init() {
 	SetFormatter(logrus.StandardLogger())
 	logrus.SetLevel(logrus.DebugLevel)
+	setOutput(logrus.StandardLogger())
 	logrus.AddHook(&traceHook{})
+}
+
+func setOutput(logger *logrus.Logger) {
+	var (
+		folder   = "./log/"
+		filePath = "app.log"
+		errPath  = "error.log"
+	)
+	if err := os.MkdirAll(folder, 0750); err != nil && !os.IsExist(err) {
+		panic(err)
+	}
+
+	file, err := os.OpenFile(folder+filePath, os.O_CREATE|os.O_RDWR, 0755)
+	if err != nil {
+		panic(err)
+	}
+
+	logrus.SetOutput(file)
+	rotateInfo, err := rotatelogs.New(
+		folder+filePath+".%Y%m%d%H%M%S",
+		rotatelogs.WithLinkName(folder+filePath),
+		rotatelogs.WithMaxAge(7*24*time.Hour),
+		rotatelogs.WithRotationTime(1*time.Hour),
+	)
+	rotateError, err := rotatelogs.New(
+		folder+errPath+".%Y%m%d%H%M%S",
+		rotatelogs.WithLinkName(folder+errPath),
+		rotatelogs.WithMaxAge(7*24*time.Hour),
+		rotatelogs.WithRotationTime(1*time.Hour),
+	)
+	if err != nil {
+		panic(err)
+	}
+	rotationMap := lfshook.WriterMap{
+		logrus.DebugLevel: rotateInfo,
+		logrus.InfoLevel:  rotateInfo,
+		logrus.WarnLevel:  rotateError,
+		logrus.ErrorLevel: rotateError,
+		logrus.FatalLevel: rotateError,
+		logrus.PanicLevel: rotateError,
+	}
+	logrus.AddHook(lfshook.NewHook(rotationMap, &logrus.JSONFormatter{
+		TimestampFormat: time.DateTime,
+	}))
 }
 
 func SetFormatter(logger *logrus.Logger) {
@@ -28,12 +74,11 @@ func SetFormatter(logger *logrus.Logger) {
 		},
 	})
 	if isLocal, _ := strconv.ParseBool(os.Getenv("LOCAL_ENV")); isLocal {
-		logger.SetFormatter(&prefixed.TextFormatter{
-			ForceFormatting: true,
-			TimestampFormat: time.RFC3339,
-			ForceColors:     true,
-		})
-
+		//logger.SetFormatter(&prefixed.TextFormatter{
+		//	ForceFormatting: true,
+		//	TimestampFormat: time.RFC3339,
+		//	ForceColors:     true,
+		//})
 	}
 }
 

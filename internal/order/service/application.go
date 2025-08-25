@@ -13,8 +13,8 @@ import (
 	"github.com/mushroomyuan/gorder/order/app"
 	"github.com/mushroomyuan/gorder/order/app/command"
 	"github.com/mushroomyuan/gorder/order/app/query"
+	"github.com/mushroomyuan/gorder/order/infrastructure/mq"
 	amqp "github.com/rabbitmq/amqp091-go"
-	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -46,15 +46,18 @@ func newApplication(_ context.Context, stockGRPC query.StockService, ch *amqp.Ch
 	// orderInmemRepo := adapters.NewMemoryOrderRepository()
 	mongoClient := newMongoClient()
 	mongoRepo := adapters.NewOrderRepositoryMongo(mongoClient)
-	logger := logrus.NewEntry(logrus.StandardLogger())
-	metricsClient := metrics.TodoMetrics{}
+	metricsClient := metrics.NewPrometheusMetricsClient(&metrics.PrometheusMetricsClientConfig{
+		Host:        viper.GetString("order.metrics-export-addr"),
+		ServiceName: viper.GetString("order.service-name"),
+	})
+	eventPublisher := mq.NewRabbitMQEventPublisher(ch)
 	return app.Application{
 		Commands: app.Commands{
-			CreateOrder: command.NewCreateOrderHandler(mongoRepo, stockGRPC, ch, logger, metricsClient),
-			UpdateOrder: command.NewUpdateOrderHandler(mongoRepo, logger, metricsClient),
+			CreateOrder: command.NewCreateOrderHandler(mongoRepo, stockGRPC, eventPublisher, metricsClient),
+			UpdateOrder: command.NewUpdateOrderHandler(mongoRepo, metricsClient),
 		},
 		Queries: app.Queries{
-			GetCustomerOrder: query.NewGetCustomerOrderHandler(mongoRepo, logger, metricsClient),
+			GetCustomerOrder: query.NewGetCustomerOrderHandler(mongoRepo, metricsClient),
 		},
 	}
 }

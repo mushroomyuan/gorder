@@ -27,7 +27,10 @@ func (it Item) validate() error {
 	if it.PriceID == "" {
 		invalidFields = append(invalidFields, "PriceID")
 	}
-	return fmt.Errorf("item %v is invalid,empty fields = [%s]", it, strings.Join(invalidFields, ", "))
+	if len(invalidFields) > 0 {
+		return fmt.Errorf("item %v is invalid,empty fields = [%s]", it, strings.Join(invalidFields, ", "))
+	}
+	return nil
 }
 
 func NewItem(ID string, name string, quantity int32, priceID string) *Item {
@@ -40,7 +43,6 @@ func NewValidItem(ID string, name string, quantity int32, priceID string) (*Item
 		return nil, err
 	}
 	return item, nil
-
 }
 
 type ItemWithQuantity struct {
@@ -56,8 +58,13 @@ func (iq ItemWithQuantity) validate() error {
 	if iq.ID == "" {
 		invalidFields = append(invalidFields, "ID")
 	}
-
-	return errors.New(strings.Join(invalidFields, ","))
+	if iq.Quantity < 0 {
+		invalidFields = append(invalidFields, "Quantity")
+	}
+	if len(invalidFields) > 0 {
+		return errors.New("ItemWithQuantity validate failed||" + strings.Join(invalidFields, ","))
+	}
+	return nil
 }
 
 func NewItemWithQuantity(ID string, quantity int32) *ItemWithQuantity {
@@ -98,7 +105,10 @@ func (o *Order) validate() error {
 			break
 		}
 	}
-	return errors.New(strings.Join(invalidFields, ","))
+	if len(invalidFields) > 0 {
+		return errors.New(strings.Join(invalidFields, ","))
+	}
+	return nil
 }
 
 func NewOrder(items []*Item, paymentLink string, status string, customerID string, ID string) *Order {
