@@ -7,12 +7,12 @@ import (
 	"github.com/mushroomyuan/gorder/common"
 	client "github.com/mushroomyuan/gorder/common/client/order"
 	"github.com/mushroomyuan/gorder/common/consts"
+	"github.com/mushroomyuan/gorder/common/convertor"
 	"github.com/mushroomyuan/gorder/common/handler/errors"
 	"github.com/mushroomyuan/gorder/order/app"
 	"github.com/mushroomyuan/gorder/order/app/command"
 	"github.com/mushroomyuan/gorder/order/app/dto"
 	"github.com/mushroomyuan/gorder/order/app/query"
-	"github.com/mushroomyuan/gorder/order/convertor"
 )
 
 type HTTPServer struct {
@@ -58,9 +58,7 @@ func (s *HTTPServer) GetCustomerCustomerIdOrdersOrderId(c *gin.Context, customer
 
 	var (
 		err  error
-		resp struct {
-			Order *client.Order
-		}
+		resp any
 	)
 
 	defer func() {
@@ -74,7 +72,13 @@ func (s *HTTPServer) GetCustomerCustomerIdOrdersOrderId(c *gin.Context, customer
 	if err != nil {
 		return
 	}
-	resp.Order = convertor.NewOrderConvertor().EntityToClient(o)
+	resp = client.Order{
+		Id:          o.ID,
+		CustomerId:  o.CustomerID,
+		Items:       convertor.NewItemConvertor().EntitiesToClients(o.Items),
+		PaymentLink: o.PaymentLink,
+		Status:      o.Status,
+	}
 }
 
 func (s *HTTPServer) validate(req client.CreateOrderRequest) error {

@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/mushroomyuan/gorder/common/decorator"
+	"github.com/mushroomyuan/gorder/common/logging"
 	domain "github.com/mushroomyuan/gorder/order/domain/order"
 	"github.com/sirupsen/logrus"
 )
@@ -21,13 +22,12 @@ type updateOrderHandler struct {
 }
 
 func (u updateOrderHandler) Handle(ctx context.Context, cmd UpdateOrder) (any, error) {
+	var err error
+	defer logging.WhenCommandExecuted(ctx, "UpdateOrderHandler", cmd, err)
 	if cmd.UpdateFn == nil {
-		logrus.Warnf("updateOrderHandler got nil UpdateFn,order = %#v", cmd.Order.ID)
-		cmd.UpdateFn = func(_ context.Context, order *domain.Order) (*domain.Order, error) {
-			return order, nil
-		}
+		logrus.Panicf("UpdateOrder handler must have UpdateOrder function,cmd=%+v", cmd)
 	}
-	if err := u.orderRepo.Update(ctx, cmd.Order, cmd.UpdateFn); err != nil {
+	if err = u.orderRepo.Update(ctx, cmd.Order, cmd.UpdateFn); err != nil {
 		return nil, err
 	}
 	return nil, nil

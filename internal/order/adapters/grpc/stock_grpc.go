@@ -2,10 +2,11 @@ package grpc
 
 import (
 	"context"
+	"errors"
 
 	"github.com/mushroomyuan/gorder/common/genproto/orderpb"
 	"github.com/mushroomyuan/gorder/common/genproto/stockpb"
-	"github.com/sirupsen/logrus"
+	"github.com/mushroomyuan/gorder/common/logging"
 )
 
 type StockGRPC struct {
@@ -16,18 +17,24 @@ func NewStockGRPC(client stockpb.StockServiceClient) *StockGRPC {
 	return &StockGRPC{client: client}
 }
 
-func (s StockGRPC) CheckIfItemsInStock(ctx context.Context, items []*orderpb.ItemWithQuantity) (*stockpb.CheckIfItemsInStockResponse, error) {
-	response, err := s.client.CheckIfItemsInStock(ctx, &stockpb.CheckIfItemsInStockRequest{Items: items})
-	logrus.Info("stock_grpc response", response)
-	return response, err
+func (s StockGRPC) CheckIfItemsInStock(ctx context.Context, items []*orderpb.ItemWithQuantity) (resp *stockpb.CheckIfItemsInStockResponse, err error) {
+	_, dLog := logging.WhenRequest(ctx, "StockGRPC.CheckIfItemsInStock", items)
+	defer dLog(resp, &err)
+	if items == nil {
+		return nil, errors.New("grpc items cannot be nil")
+	}
+	return s.client.CheckIfItemsInStock(ctx, &stockpb.CheckIfItemsInStockRequest{Items: items})
+
 }
 
-func (s StockGRPC) GetItems(ctx context.Context, itemsIDs []string) ([]*orderpb.Item, error) {
+func (s StockGRPC) GetItems(ctx context.Context, itemsIDs []string) (items []*orderpb.Item, err error) {
+	_, dLog := logging.WhenRequest(ctx, "StockGRPC.GetItems", items)
+	defer dLog(items, &err)
+
 	var getItemsRequest = &stockpb.GetItemsRequest{
 		ItemsIDs: itemsIDs,
 	}
 	response, err := s.client.GetItems(ctx, getItemsRequest)
-	logrus.Info("get_items response", response)
 	if err != nil {
 		return nil, err
 	}

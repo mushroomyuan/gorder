@@ -3,7 +3,7 @@ package adapters
 import (
 	"context"
 
-	"github.com/mushroomyuan/gorder/stock/entity"
+	"github.com/mushroomyuan/gorder/common/entity"
 	"github.com/mushroomyuan/gorder/stock/infrastructure/persistent"
 	"github.com/mushroomyuan/gorder/stock/infrastructure/persistent/builder"
 	"github.com/pkg/errors"
@@ -31,10 +31,7 @@ func (m MySQLStockRepository) GetStock(ctx context.Context, ids []string) ([]*en
 	}
 	var result []*entity.ItemWithQuantity
 	for _, d := range data {
-		result = append(result, &entity.ItemWithQuantity{
-			ID:       d.ProductID,
-			Quantity: d.Quantity,
-		})
+		result = append(result, entity.NewItemWithQuantity(d.ProductID, d.Quantity))
 	}
 	return result, nil
 }
@@ -90,10 +87,7 @@ func (m MySQLStockRepository) updateOptimistic(
 func (m MySQLStockRepository) unmarshalFromDatabase(dest []persistent.StockModel) []*entity.ItemWithQuantity {
 	var result []*entity.ItemWithQuantity
 	for _, i := range dest {
-		result = append(result, &entity.ItemWithQuantity{
-			ID:       i.ProductID,
-			Quantity: i.Quantity,
-		})
+		result = append(result, entity.NewItemWithQuantity(i.ProductID, i.Quantity))
 	}
 	return result
 }

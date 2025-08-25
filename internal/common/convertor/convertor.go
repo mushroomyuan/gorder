@@ -2,16 +2,15 @@ package convertor
 
 import (
 	client "github.com/mushroomyuan/gorder/common/client/order"
+	"github.com/mushroomyuan/gorder/common/entity"
 	"github.com/mushroomyuan/gorder/common/genproto/orderpb"
-	domain "github.com/mushroomyuan/gorder/order/domain/order"
-	"github.com/mushroomyuan/gorder/order/entity"
 )
 
 type OrderConvertor struct{}
 type ItemConvertor struct{}
 type ItemWithQuantityConvertor struct{}
 
-func (c *OrderConvertor) EntityToProto(o *domain.Order) *orderpb.Order {
+func (c *OrderConvertor) EntityToProto(o *entity.Order) *orderpb.Order {
 	c.check(o)
 	return &orderpb.Order{
 		ID:          o.ID,
@@ -22,18 +21,18 @@ func (c *OrderConvertor) EntityToProto(o *domain.Order) *orderpb.Order {
 	}
 }
 
-func (c *OrderConvertor) ProtoToEntity(o *orderpb.Order) *domain.Order {
+func (c *OrderConvertor) ProtoToEntity(o *orderpb.Order) *entity.Order {
 	c.check(o)
-	return &domain.Order{
-		ID:          o.ID,
-		CustomerID:  o.CustomerID,
-		Status:      o.Status,
-		PaymentLink: o.PaymentLink,
-		Items:       NewItemConvertor().ProtosToEntities(o.Items),
-	}
+	return entity.NewOrder(
+		NewItemConvertor().ProtosToEntities(o.Items),
+		o.PaymentLink,
+		o.Status,
+		o.CustomerID,
+		o.ID,
+	)
 }
 
-func (c *OrderConvertor) EntityToClient(o *domain.Order) *client.Order {
+func (c *OrderConvertor) EntityToClient(o *entity.Order) *client.Order {
 	c.check(o)
 	return &client.Order{
 		CustomerId:  o.CustomerID,
@@ -44,15 +43,16 @@ func (c *OrderConvertor) EntityToClient(o *domain.Order) *client.Order {
 	}
 }
 
-func (c *OrderConvertor) ClientToEntity(o *client.Order) *domain.Order {
+func (c *OrderConvertor) ClientToEntity(o *client.Order) *entity.Order {
 	c.check(o)
-	return &domain.Order{
-		CustomerID:  o.CustomerId,
-		ID:          o.Id,
-		Status:      o.Status,
-		PaymentLink: o.PaymentLink,
-		Items:       NewItemConvertor().ClientsToEntities(o.Items),
-	}
+	return entity.NewOrder(
+		NewItemConvertor().ClientsToEntities(o.Items),
+		o.PaymentLink,
+		o.Status,
+		o.CustomerId,
+		o.Id,
+	)
+
 }
 
 func (c *OrderConvertor) check(o any) {
@@ -85,12 +85,7 @@ func (c *ItemConvertor) ProtosToEntities(items []*orderpb.Item) (res []*entity.I
 }
 
 func (c *ItemConvertor) ProtToEntity(o *orderpb.Item) *entity.Item {
-	return &entity.Item{
-		ID:       o.ID,
-		Name:     o.Name,
-		Quantity: o.Quantity,
-		PriceID:  o.PriceID,
-	}
+	return entity.NewItem(o.ID, o.Name, o.Quantity, o.PriceID)
 }
 
 func (c *ItemConvertor) EntitiesToClients(items []*entity.Item) (res []client.Item) {
@@ -117,12 +112,7 @@ func (c *ItemConvertor) ClientsToEntities(items []client.Item) (res []*entity.It
 }
 
 func (c *ItemConvertor) ClientToEntity(e client.Item) *entity.Item {
-	return &entity.Item{
-		ID:       e.Id,
-		Name:     e.Name,
-		Quantity: e.Quantity,
-		PriceID:  e.PriceId,
-	}
+	return entity.NewItem(e.Id, e.Name, e.Quantity, e.PriceId)
 }
 
 func (c *ItemWithQuantityConvertor) EntitiesToProtos(items []*entity.ItemWithQuantity) (res []*orderpb.ItemWithQuantity) {
@@ -147,10 +137,7 @@ func (c *ItemWithQuantityConvertor) ProtosToEntities(items []*orderpb.ItemWithQu
 }
 
 func (c *ItemWithQuantityConvertor) ProtoToEntity(i *orderpb.ItemWithQuantity) *entity.ItemWithQuantity {
-	return &entity.ItemWithQuantity{
-		ID:       i.ID,
-		Quantity: i.Quantity,
-	}
+	return entity.NewItemWithQuantity(i.ID, i.Quantity)
 }
 
 func (c *ItemWithQuantityConvertor) ClientsToEntities(items []client.ItemWithQuantity) (res []*entity.ItemWithQuantity) {
@@ -161,10 +148,7 @@ func (c *ItemWithQuantityConvertor) ClientsToEntities(items []client.ItemWithQua
 }
 
 func (c *ItemWithQuantityConvertor) ClientToEntity(i client.ItemWithQuantity) *entity.ItemWithQuantity {
-	return &entity.ItemWithQuantity{
-		ID:       i.Id,
-		Quantity: i.Quantity,
-	}
+	return entity.NewItemWithQuantity(i.Id, i.Quantity)
 }
 
 func (c *ItemWithQuantityConvertor) EntitiesToClients(items []entity.ItemWithQuantity) (res []*client.ItemWithQuantity) {

@@ -6,6 +6,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/mushroomyuan/gorder/common/logging"
 	domain "github.com/mushroomyuan/gorder/order/domain/order"
 	"github.com/sirupsen/logrus"
 )
@@ -31,7 +32,9 @@ func NewMemoryOrderRepository() *MemoryOrderRepository {
 	}
 }
 
-func (m *MemoryOrderRepository) Create(_ context.Context, order *domain.Order) (*domain.Order, error) {
+func (m *MemoryOrderRepository) Create(ctx context.Context, order *domain.Order) (created *domain.Order, err error) {
+	_, deferLog := logging.WhenRequest(ctx, "MemoryOrderRepository.Create", map[string]any{"order": order})
+	defer deferLog(created, &err)
 	m.lock.Lock()
 	defer m.lock.Unlock()
 	newOrder := &domain.Order{
@@ -42,26 +45,33 @@ func (m *MemoryOrderRepository) Create(_ context.Context, order *domain.Order) (
 		Items:       order.Items,
 	}
 	m.store = append(m.store, newOrder)
-	logrus.WithFields(logrus.Fields{
-		"input_order":        order,
-		"store_after_create": m.store,
-	}).Debug("memory order created")
 	return newOrder, nil
 }
 
-func (m *MemoryOrderRepository) Get(_ context.Context, id, customerID string) (*domain.Order, error) {
+func (m *MemoryOrderRepository) Get(ctx context.Context, id, customerID string) (got *domain.Order, err error) {
+	_, deferLog := logging.WhenRequest(ctx, "MemoryOrderRepository.Get", map[string]any{
+		"id":          id,
+		"customer_id": customerID,
+	})
+	defer deferLog(got, &err)
 	m.lock.RLock()
 	defer m.lock.RUnlock()
 	for _, order := range m.store {
 		if order.CustomerID == customerID && order.ID == id {
-			logrus.Debugf("memory_order_repo_get||found||id=%s||CustomerID=%s||res=%+v", order.ID, order.CustomerID, *order)
 			return order, nil
 		}
 	}
 	return nil, domain.NotFoundError{OrderID: id}
 }
 
-func (m *MemoryOrderRepository) Update(ctx context.Context, o *domain.Order, updateFn func(context.Context, *domain.Order) (*domain.Order, error)) error {
+func (m *MemoryOrderRepository) Update(
+	ctx context.Context,
+	o *domain.Order,
+	updateFn func(context.Context, *domain.Order) (*domain.Order, error),
+) (err error) {
+	_, deferLog := logging.WhenRequest(ctx, "MemoryOrderRepository.Update", map[string]any{"order": o})
+	defer deferLog(nil, &err)
+
 	m.lock.Lock()
 	defer m.lock.Unlock()
 	found := false

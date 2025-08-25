@@ -8,7 +8,7 @@ import (
 	"time"
 
 	_ "github.com/mushroomyuan/gorder/common/config"
-	"github.com/mushroomyuan/gorder/stock/entity"
+	"github.com/mushroomyuan/gorder/common/entity"
 	"github.com/mushroomyuan/gorder/stock/infrastructure/persistent"
 	"github.com/mushroomyuan/gorder/stock/infrastructure/persistent/builder"
 	"github.com/spf13/viper"
@@ -84,10 +84,7 @@ func TestMySQLStockRepository_UpdateStock_Race(t *testing.T) {
 					for _, e := range existing {
 						for _, q := range query {
 							if e.ID == q.ID {
-								newItems = append(newItems, &entity.ItemWithQuantity{
-									ID:       e.ID,
-									Quantity: e.Quantity - q.Quantity,
-								})
+								newItems = append(newItems, entity.NewItemWithQuantity(e.ID, e.Quantity-q.Quantity))
 							}
 						}
 					}
@@ -140,10 +137,7 @@ func TestMySQLStockRepository_UpdateStock_OverSell(t *testing.T) {
 					for _, e := range existing {
 						for _, q := range query {
 							if e.ID == q.ID {
-								newItems = append(newItems, &entity.ItemWithQuantity{
-									ID:       e.ID,
-									Quantity: e.Quantity - q.Quantity,
-								})
+								newItems = append(newItems, entity.NewItemWithQuantity(e.ID, e.Quantity-q.Quantity))
 							}
 						}
 					}

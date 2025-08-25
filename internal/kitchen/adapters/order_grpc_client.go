@@ -15,6 +15,6 @@ func NewOrderGRPC(client orderpb.OrderServiceClient) *OrderGRPC {
 }
 
 func (g *OrderGRPC) UpdateOrder(ctx context.Context, req *orderpb.Order) error {
-	_, err := g.client.UpdataOrder(ctx, req)
+	_, err := g.client.UpdateOrder(ctx, req)
 	return err
 }

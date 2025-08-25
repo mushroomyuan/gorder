@@ -6,9 +6,10 @@ import (
 	"time"
 
 	"github.com/mushroomyuan/gorder/common/decorator"
+	"github.com/mushroomyuan/gorder/common/entity"
 	"github.com/mushroomyuan/gorder/common/handler/redis"
+	"github.com/mushroomyuan/gorder/common/logging"
 	domain "github.com/mushroomyuan/gorder/stock/domain/stock"
-	"github.com/mushroomyuan/gorder/stock/entity"
 	"github.com/mushroomyuan/gorder/stock/infrastructure/integration"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
@@ -67,7 +68,7 @@ func (c checkIfItemsInStockHandler) Handle(ctx context.Context, query CheckIfIte
 	}
 	defer func() {
 		if err := unlock(ctx, getLockKey(query)); err != nil {
-			logrus.Warnf("redis unlock failed: %v", err)
+			logging.Warnf(ctx, nil, "redis unlock error,err=%v", err)
 		}
 	}()
 
@@ -78,17 +79,12 @@ func (c checkIfItemsInStockHandler) Handle(ctx context.Context, query CheckIfIte
 			logrus.Warningf("GetPriceByProductID error:itemID=%s,err= %v", item.ID, err)
 			return nil, err
 		}
-		res = append(res, &entity.Item{
-			ID:       item.ID,
-			Quantity: item.Quantity,
-			PriceID:  priceID,
-		})
+		res = append(res, entity.NewItem(item.ID, "", item.Quantity, priceID))
 	}
 
 	if err := c.checkStock(ctx, query.Items); err != nil {
 		return nil, err
 	}
-	//TODO:扣库存
 	return res, nil
 }
 
@@ -151,10 +147,11 @@ func (c checkIfItemsInStockHandler) checkStock(ctx context.Context, query []*ent
 			for _, e := range existing {
 				for _, q := range query {
 					if e.ID == q.ID {
-						newItems = append(newItems, &entity.ItemWithQuantity{
-							ID:       e.ID,
-							Quantity: e.Quantity - q.Quantity,
-						})
+						iq, err := entity.NewValidItemWithQuantity(e.ID, e.Quantity-q.Quantity)
+						if err != nil {
+							return nil, err
+						}
+						newItems = append(newItems, iq)
 					}
 				}
 			}

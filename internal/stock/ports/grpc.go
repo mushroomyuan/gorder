@@ -3,11 +3,11 @@ package ports
 import (
 	"context"
 
+	"github.com/mushroomyuan/gorder/common/convertor"
 	"github.com/mushroomyuan/gorder/common/genproto/stockpb"
 	"github.com/mushroomyuan/gorder/common/tracing"
 	"github.com/mushroomyuan/gorder/stock/app"
 	"github.com/mushroomyuan/gorder/stock/app/query"
-	"github.com/mushroomyuan/gorder/stock/convertor"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )

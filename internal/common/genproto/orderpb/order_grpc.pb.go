@@ -22,7 +22,7 @@ const _ = grpc.SupportPackageIsVersion9
 const (
 	OrderService_CreateOrder_FullMethodName = "/orderpb.OrderService/CreateOrder"
 	OrderService_GetOrder_FullMethodName    = "/orderpb.OrderService/GetOrder"
-	OrderService_UpdataOrder_FullMethodName = "/orderpb.OrderService/UpdataOrder"
+	OrderService_UpdateOrder_FullMethodName = "/orderpb.OrderService/UpdateOrder"
 )
 
 // OrderServiceClient is the client API for OrderService service.
@@ -31,7 +31,7 @@ const (
 type OrderServiceClient interface {
 	CreateOrder(ctx context.Context, in *CreateOrderRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	GetOrder(ctx context.Context, in *GetOrderRequest, opts ...grpc.CallOption) (*Order, error)
-	UpdataOrder(ctx context.Context, in *Order, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	UpdateOrder(ctx context.Context, in *Order, opts ...grpc.CallOption) (*emptypb.Empty, error)
 }
 
 type orderServiceClient struct {
@@ -62,10 +62,10 @@ func (c *orderServiceClient) GetOrder(ctx context.Context, in *GetOrderRequest, 
 	return out, nil
 }
 
-func (c *orderServiceClient) UpdataOrder(ctx context.Context, in *Order, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+func (c *orderServiceClient) UpdateOrder(ctx context.Context, in *Order, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(emptypb.Empty)
-	err := c.cc.Invoke(ctx, OrderService_UpdataOrder_FullMethodName, in, out, cOpts...)
+	err := c.cc.Invoke(ctx, OrderService_UpdateOrder_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -78,7 +78,7 @@ func (c *orderServiceClient) UpdataOrder(ctx context.Context, in *Order, opts ..
 type OrderServiceServer interface {
 	CreateOrder(context.Context, *CreateOrderRequest) (*emptypb.Empty, error)
 	GetOrder(context.Context, *GetOrderRequest) (*Order, error)
-	UpdataOrder(context.Context, *Order) (*emptypb.Empty, error)
+	UpdateOrder(context.Context, *Order) (*emptypb.Empty, error)
 }
 
 // UnimplementedOrderServiceServer should be embedded to have
@@ -94,8 +94,8 @@ func (UnimplementedOrderServiceServer) CreateOrder(context.Context, *CreateOrder
 func (UnimplementedOrderServiceServer) GetOrder(context.Context, *GetOrderRequest) (*Order, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetOrder not implemented")
 }
-func (UnimplementedOrderServiceServer) UpdataOrder(context.Context, *Order) (*emptypb.Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method UpdataOrder not implemented")
+func (UnimplementedOrderServiceServer) UpdateOrder(context.Context, *Order) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateOrder not implemented")
 }
 func (UnimplementedOrderServiceServer) testEmbeddedByValue() {}
 
@@ -153,20 +153,20 @@ func _OrderService_GetOrder_Handler(srv interface{}, ctx context.Context, dec fu
 	return interceptor(ctx, in, info, handler)
 }
 
-func _OrderService_UpdataOrder_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _OrderService_UpdateOrder_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(Order)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(OrderServiceServer).UpdataOrder(ctx, in)
+		return srv.(OrderServiceServer).UpdateOrder(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: OrderService_UpdataOrder_FullMethodName,
+		FullMethod: OrderService_UpdateOrder_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(OrderServiceServer).UpdataOrder(ctx, req.(*Order))
+		return srv.(OrderServiceServer).UpdateOrder(ctx, req.(*Order))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -187,8 +187,8 @@ var OrderService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _OrderService_GetOrder_Handler,
 		},
 		{
-			MethodName: "UpdataOrder",
-			Handler:    _OrderService_UpdataOrder_Handler,
+			MethodName: "UpdateOrder",
+			Handler:    _OrderService_UpdateOrder_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

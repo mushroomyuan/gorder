@@ -3,15 +3,17 @@ package command
 import (
 	"context"
 
+	"github.com/mushroomyuan/gorder/common/convertor"
 	"github.com/mushroomyuan/gorder/common/decorator"
-	"github.com/mushroomyuan/gorder/common/genproto/orderpb"
+	"github.com/mushroomyuan/gorder/common/entity"
+	"github.com/mushroomyuan/gorder/common/logging"
 	"github.com/mushroomyuan/gorder/common/tracing"
 	domain "github.com/mushroomyuan/gorder/payment/domain"
 	"github.com/sirupsen/logrus"
 )
 
 type CreatePayment struct {
-	Order *orderpb.Order
+	Order *entity.Order
 }
 
 type CreatePaymentHandler decorator.CommandHandler[CreatePayment, string]
@@ -44,7 +46,10 @@ func NewCreatePaymentHandler(
 }
 
 func (c createPaymentHandler) Handle(ctx context.Context, cmd CreatePayment) (string, error) {
-	// return "test-retry-link", errors.New("test retry error")
+
+	var err error
+	defer logging.WhenCommandExecuted(ctx, "CreatePaymentHandler", cmd, err)
+
 	_, span := tracing.Start(ctx, "create_payment")
 	defer span.End()
 
@@ -53,14 +58,17 @@ func (c createPaymentHandler) Handle(ctx context.Context, cmd CreatePayment) (st
 		return "", err
 	}
 	logrus.Infof("create payment link for order:%s succese,paymentLink:%s", cmd.Order.ID, paymentLink)
-	newOrder := &orderpb.Order{
-		ID:          cmd.Order.ID,
-		CustomerID:  cmd.Order.CustomerID,
-		Status:      "waiting for payment",
-		PaymentLink: paymentLink,
-		Items:       cmd.Order.Items,
+	newOrder, err := entity.NewValidOrder(
+		cmd.Order.Items,
+		paymentLink,
+		"waiting for payment",
+		cmd.Order.CustomerID,
+		cmd.Order.ID,
+	)
+	if err != nil {
+		return "", err
 	}
 
-	err = c.orderGRPC.UpdateOrder(ctx, newOrder)
+	err = c.orderGRPC.UpdateOrder(ctx, convertor.NewOrderConvertor().EntityToProto(newOrder))
 	return paymentLink, err
 }
